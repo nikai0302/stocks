@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>PSE Stocks</title>
+<link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --bg: #000;
+    --bg2: #111;
+    --bg3: #1c1c1e;
+    --bg4: #2c2c2e;
+    --border: rgba(255,255,255,0.08);
+    --text1: #fff;
+    --text2: #ebebf5cc;
+    --text3: #ebebf599;
+    --green: #30d158;
+    --red: #ff453a;
+    --blue: #0a84ff;
+    --yellow: #ffd60a;
+    --tab-active: #fff;
+    --tab-inactive: #636366;
+    --font: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  }
+  body {
+    background: var(--bg);
+    color: var(--text1);
+    font-family: var(--font);
+    max-width: 430px;
+    margin: 0 auto;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+  .phone-frame {
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px 0;
+    height: 50px;
+  }
+  .status-time { font-size: 15px; font-weight: 600; }
+  .status-icons { display: flex; gap: 6px; align-items: center; }
+  .status-icons svg { fill: white; }
+  .content-area {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 90px;
+    scroll-behavior: smooth;
+  }
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* Header */
+  .screen-header {
+    padding: 8px 20px 12px;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 10;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .screen-title {
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+  }
+  .search-bar {
+    background: var(--bg4);
+    border-radius: 12px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text3);
+    font-size: 15px;
+  }
+  .search-icon { opacity: 0.5; font-size: 16px; }
+
+  /* Portfolio Summary */
+  .portfolio-summary {
+    padding: 24px 20px 16px;
+    text-align: center;
+  }
+  .total-label { font-size: 13px; color: var(--text3); margin-bottom: 6px; letter-spacing: 0.3px; }
+  .total-value { font-size: 44px; font-weight: 300; letter-spacing: -1px; margin-bottom: 8px; }
+  .total-change {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 16px;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+  .total-change.up { background: rgba(48,209,88,0.15); color: var(--green); }
+  .total-change.down { background: rgba(255,69,58,0.15); color: var(--red); }
+
+  /* Mini chart */
+  .portfolio-chart {
+    margin: 0 20px 20px;
+    background: var(--bg3);
+    border-radius: 16px;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .chart-period-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 14px;
+  }
+  .period-tab {
+    flex: 1;
+    text-align: center;
+    padding: 5px 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text3);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .period-tab.active {
+    background: var(--bg4);
+    color: var(--text1);
+  }
+  .sparkline-container { height: 80px; position: relative; }
+
+  /* Section headers */
+  .section-label {
+    font-size: 22px;
+    font-weight: 700;
+    padding: 16px 20px 10px;
+    letter-spacing: -0.3px;
+  }
+
+  /* Stock rows */
+  .stock-list { padding: 0 12px; }
+  .stock-card {
+    background: var(--bg3);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: background 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .stock-card:active { background: var(--bg4); }
+  .stock-card::after {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    border-radius: 3px 0 0 3px;
+  }
+  .stock-card.up::after { background: var(--green); }
+  .stock-card.down::after { background: var(--red); }
+
+  .stock-logo {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    letter-spacing: -0.5px;
+  }
+  .stock-info { flex: 1; min-width: 0; }
+  .stock-ticker { font-size: 16px; font-weight: 600; }
+  .stock-name { font-size: 12px; color: var(--text3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .stock-shares { font-size: 11px; color: var(--text3); margin-top: 3px; }
+
+  .stock-mini-chart { width: 60px; height: 36px; }
+  .stock-price-info { text-align: right; flex-shrink: 0; }
+  .stock-price { font-size: 16px; font-weight: 600; }
+  .stock-badge {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 6px;
+    margin-top: 4px;
+  }
+  .stock-badge.up { background: var(--green); color: #000; }
+  .stock-badge.down { background: var(--red); color: #fff; }
+
+  /* Recommendation cards */
+  .rec-cards { padding: 0 12px; }
+  .rec-card {
+    background: var(--bg3);
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .rec-card:active { background: var(--bg4); }
+  .rec-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .rec-card-left { display: flex; align-items: center; gap: 12px; }
+  .rec-tag {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+  }
+  .rec-tag.buy { background: rgba(48,209,88,0.2); color: var(--green); }
+  .rec-tag.hold { background: rgba(255,214,10,0.2); color: var(--yellow); }
+  .rec-tag.sell { background: rgba(255,69,58,0.2); color: var(--red); }
+  .rec-tag.watch { background: rgba(10,132,255,0.2); color: var(--blue); }
+
+  .rec-reason {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+  .rec-metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+  .rec-metric {
+    background: var(--bg4);
+    border-radius: 10px;
+    padding: 8px 10px;
+    text-align: center;
+  }
+  .rec-metric-label { font-size: 10px; color: var(--text3); margin-bottom: 3px; letter-spacing: 0.2px; }
+  .rec-metric-value { font-size: 13px; font-weight: 600; }
+
+  /* AI Advisor */
+  .advisor-area { padding: 16px 12px; }
+  .ai-card {
+    background: var(--bg3);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .ai-card-header {
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .ai-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #0a84ff, #5e5ce6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+  .ai-card-body { padding: 16px 18px; }
+  .chat-messages { display: flex; flex-direction: column; gap: 12px; margin-bottom: 14px; min-height: 80px; }
+  .chat-msg {
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 14px;
+    line-height: 1.5;
+    max-width: 85%;
+    animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .chat-msg.user {
+    background: var(--blue);
+    color: #fff;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+  }
+  .chat-msg.ai {
+    background: var(--bg4);
+    color: var(--text1);
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+  }
+  .typing-indicator { display: flex; gap: 4px; padding: 10px 14px; background: var(--bg4); border-radius: 14px; border-bottom-left-radius: 4px; align-self: flex-start; width: fit-content; }
+  .typing-dot { width: 8px; height: 8px; background: var(--text3); border-radius: 50%; animation: bounce 1.2s infinite; }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+
+  .chat-input-area {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+  }
+  .chat-input {
+    flex: 1;
+    background: var(--bg4);
+    border: none;
+    border-radius: 20px;
+    padding: 10px 16px;
+    color: var(--text1);
+    font-size: 14px;
+    font-family: var(--font);
+    outline: none;
+    resize: none;
+    max-height: 100px;
+    min-height: 40px;
+  }
+  .chat-input::placeholder { color: var(--text3); }
+  .send-btn {
+    width: 36px; height: 36px;
+    background: var(--blue);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: opacity 0.2s;
+  }
+  .send-btn:active { opacity: 0.7; }
+  .send-btn svg { fill: white; }
+
+  .quick-prompts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .quick-prompt {
+    background: var(--bg4);
+    border: 0.5px solid var(--border);
+    border-radius: 20px;
+    padding: 7px 14px;
+    font-size: 13px;
+    color: var(--blue);
+    cursor: pointer;
+    transition: background 0.15s;
+    font-family: var(--font);
+  }
+  .quick-prompt:active { background: var(--bg3); }
+
+  /* Bottom Tab Bar */
+  .tab-bar {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 430px;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 0.5px solid var(--border);
+    padding: 10px 0 24px;
+    display: flex;
+    z-index: 100;
+  }
+  .tab-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    padding: 4px 0;
+    transition: all 0.2s;
+  }
+  .tab-icon {
+    width: 26px; height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  .tab-icon svg { transition: fill 0.2s; }
+  .tab-label {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--tab-inactive);
+    transition: color 0.2s;
+    letter-spacing: 0.2px;
+  }
+  .tab-item.active .tab-label { color: var(--tab-active); }
+  .tab-item.active .tab-icon svg { fill: var(--tab-active); }
+  .tab-item:not(.active) .tab-icon svg { fill: var(--tab-inactive); }
+
+  /* Donut chart */
+  .allocation-card {
+    background: var(--bg3);
+    border-radius: 16px;
+    padding: 18px;
+    margin: 0 12px 10px;
+  }
+  .allocation-title { font-size: 15px; font-weight: 600; margin-bottom: 14px; color: var(--text2); }
+  .allocation-inner { display: flex; align-items: center; gap: 16px; }
+  .donut-wrap { position: relative; flex-shrink: 0; }
+  .donut-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+  .donut-total { font-size: 11px; color: var(--text3); }
+  .donut-pct { font-size: 18px; font-weight: 600; }
+  .allocation-legend { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .legend-name { font-size: 13px; color: var(--text2); flex: 1; }
+  .legend-pct { font-size: 13px; font-weight: 600; }
+
+  /* Divider */
+  .divider { height: 8px; background: transparent; }
+</style>
+</head>
+<body>
+<div class="phone-frame">
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span class="status-time" id="clock">9:41</span>
+    <div class="status-icons">
+      <svg width="17" height="12" viewBox="0 0 17 12"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="2" width="3" height="10" rx="1"/><rect x="9" y="0.5" width="3" height="11.5" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity="0.35"/></svg>
+      <svg width="16" height="12" viewBox="0 0 16 12"><path d="M8 2.4C5.6 2.4 3.5 3.4 2 5L0 3C2.1 1.1 4.9 0 8 0s5.9 1.1 8 3l-2 2C12.5 3.4 10.4 2.4 8 2.4z"/><path d="M8 6.8c-1.4 0-2.6.5-3.5 1.4L2.5 6.2C3.9 4.8 5.8 4 8 4s4.1.8 5.5 2.2L11.5 8.2C10.6 7.3 9.4 6.8 8 6.8z"/><circle cx="8" cy="11" r="1.5"/></svg>
+      <svg width="25" height="12" viewBox="0 0 25 12"><rect x="0" y="1" width="21" height="10" rx="3" stroke="white" stroke-width="1" fill="none" opacity="0.35"/><rect x="22" y="4" width="3" height="4" rx="1" fill="white" opacity="0.4"/><rect x="1.5" y="2.5" width="16" height="7" rx="1.5" fill="white"/></svg>
+    </div>
+  </div>
+
+  <!-- Content Area -->
+  <div class="content-area" id="contentArea">
+
+    <!-- SCREEN 1: PORTFOLIO -->
+    <div class="screen active" id="screen-portfolio">
+      <div class="screen-header">
+        <div class="screen-title">My Portfolio</div>
+        <div class="search-bar">
+          <span class="search-icon">🔍</span>
+          <span>Search PSE stocks…</span>
+        </div>
+      </div>
+
+      <div class="portfolio-summary">
+        <div class="total-label">TOTAL VALUE (₱)</div>
+        <div class="total-value">₱47,831</div>
+        <div class="total-change up">▲ ₱1,243 &nbsp;+2.67% today</div>
+      </div>
+
+      <div class="portfolio-chart">
+        <div class="chart-period-tabs">
+          <div class="period-tab">1D</div>
+          <div class="period-tab active">1W</div>
+          <div class="period-tab">1M</div>
+          <div class="period-tab">3M</div>
+          <div class="period-tab">1Y</div>
+        </div>
+        <div class="sparkline-container">
+          <svg width="100%" height="80" viewBox="0 0 320 80" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#30d158" stop-opacity="0.25"/>
+                <stop offset="100%" stop-color="#30d158" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path d="M0,65 C20,60 30,55 50,50 C70,45 80,48 100,42 C120,36 130,40 150,32 C170,24 180,28 200,20 C220,12 240,18 260,14 C280,10 300,8 320,5" stroke="#30d158" stroke-width="2" fill="none"/>
+            <path d="M0,65 C20,60 30,55 50,50 C70,45 80,48 100,42 C120,36 130,40 150,32 C170,24 180,28 200,20 C220,12 240,18 260,14 C280,10 300,8 320,5 L320,80 L0,80 Z" fill="url(#lineGrad)"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="allocation-card">
+        <div class="allocation-title">Allocation</div>
+        <div class="allocation-inner">
+          <div class="donut-wrap">
+            <svg width="90" height="90" viewBox="0 0 90 90">
+              <circle cx="45" cy="45" r="35" fill="none" stroke="#2c2c2e" stroke-width="12"/>
+              <circle cx="45" cy="45" r="35" fill="none" stroke="#ff453a" stroke-width="12" stroke-dasharray="110 110" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 45 45)"/>
+              <circle cx="45" cy="45" r="35" fill="none" stroke="#30d158" stroke-width="12" stroke-dasharray="110 110" stroke-dashoffset="-110" stroke-linecap="round" transform="rotate(-90 45 45)"/>
+            </svg>
+            <div class="donut-center">
+              <div class="donut-total" style="font-size:9px; color: var(--text3)">2 stocks</div>
+            </div>
+          </div>
+          <div class="allocation-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#ff453a"></div><span class="legend-name">BDO</span><span class="legend-pct" style="color:#ff453a">50%</span></div>
+            <div class="legend-item"><div class="legend-dot" style="background:#30d158"></div><span class="legend-name">JFC</span><span class="legend-pct" style="color:#30d158">50%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-label">Holdings</div>
+      <div class="stock-list">
+        <!-- JFC -->
+        <div class="stock-card up" onclick="openDetail('JFC')">
+          <div class="stock-logo" style="background:linear-gradient(135deg,#e63946,#a8201a);color:#fff;">JFC</div>
+          <div class="stock-info">
+            <div class="stock-ticker">JFC</div>
+            <div class="stock-name">Jollibee Foods Corporation</div>
+            <div class="stock-shares">100 shares · Avg ₱218.00</div>
+          </div>
+          <svg class="stock-mini-chart" viewBox="0 0 60 36" preserveAspectRatio="none">
+            <polyline points="0,28 10,24 20,26 30,18 40,14 50,16 60,10" stroke="#30d158" stroke-width="1.5" fill="none"/>
+          </svg>
+          <div class="stock-price-info">
+            <div class="stock-price">₱234.50</div>
+            <div class="stock-badge up">+3.1%</div>
+          </div>
+        </div>
+
+        <!-- BDO -->
+        <div class="stock-card down" onclick="openDetail('BDO')">
+          <div class="stock-logo" style="background:linear-gradient(135deg,#0a84ff,#0055b3);color:#fff;">BDO</div>
+          <div class="stock-info">
+            <div class="stock-ticker">BDO</div>
+            <div class="stock-name">BDO Unibank Inc.</div>
+            <div class="stock-shares">150 shares · Avg ₱144.00</div>
+          </div>
+          <svg class="stock-mini-chart" viewBox="0 0 60 36" preserveAspectRatio="none">
+            <polyline points="0,10 10,12 20,8 30,14 40,18 50,22 60,26" stroke="#ff453a" stroke-width="1.5" fill="none"/>
+          </svg>
+          <div class="stock-price-info">
+            <div class="stock-price">₱138.20</div>
+            <div class="stock-badge down">-1.3%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="section-label">Performance</div>
+      <div class="stock-list">
+        <div class="stock-card up" style="flex-direction:column; align-items:stretch; gap:12px;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div style="background:var(--bg4);border-radius:10px;padding:12px;">
+              <div style="font-size:11px;color:var(--text3);margin-bottom:4px;">Total Gain/Loss</div>
+              <div style="font-size:18px;font-weight:600;color:var(--green);">+₱1,243</div>
+            </div>
+            <div style="background:var(--bg4);border-radius:10px;padding:12px;">
+              <div style="font-size:11px;color:var(--text3);margin-bottom:4px;">Return %</div>
+              <div style="font-size:18px;font-weight:600;color:var(--green);">+2.67%</div>
+            </div>
+            <div style="background:var(--bg4);border-radius:10px;padding:12px;">
+              <div style="font-size:11px;color:var(--text3);margin-bottom:4px;">Day's P&L</div>
+              <div style="font-size:18px;font-weight:600;color:var(--green);">+₱420</div>
+            </div>
+            <div style="background:var(--bg4);border-radius:10px;padding:12px;">
+              <div style="font-size:11px;color:var(--text3);margin-bottom:4px;">Cost Basis</div>
+              <div style="font-size:18px;font-weight:600;">₱46,588</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="divider"></div>
+    </div>
+
+    <!-- SCREEN 2: DISCOVER -->
+    <div class="screen" id="screen-discover">
+      <div class="screen-header">
+        <div class="screen-title">Discover</div>
+        <div class="search-bar"><span class="search-icon">🔍</span><span>Search PSE stocks…</span></div>
+      </div>
+
+      <div class="section-label" style="color:var(--green);">📈 Top Performers</div>
+      <div class="stock-list">
+        <div class="stock-card up">
+          <div class="stock-logo" style="background:linear-gradient(135deg,#30d158,#1a7a35);color:#fff;">SMPH</div>
+          <div class="stock-info">
+            <div class="stock-ticker">SMPH</div>
+            <div class="stock-name">SM Prime Holdings Inc.</div>
+            <div class="stock-shares">Sector: Real Estate</div>
+          </div>
+          <svg class="stock-mini-chart" viewBox="0 0 60 36" preserveAspectRatio="none">
+            <polyline points="0,32 10,28 20,22 30,16 40,12 50,8 60,4" stroke="#30d158" stroke-width="1.5" fill="none"/>
+          </svg>
+          <div class="stock-price-info">
+            <div class="stock-price">₱33.40</div>
+            <div class="stock-badge up">+4.5%</div>
+          </div>
+        </div>
+
+        <div class="stock-card up">
+          <div class="stock-logo" style="background:linear-gradient(135deg,#ffd60a,#b89200);color:#000;">URC</div>
+          <div class="stock-info">
+            <div class="stock-ticker">URC</div>
+            <div class="stock-name">Universal Robina Corp.</div>
+            <div class="stock-shares">Sector: Consumer Goods</div>
+          </div>
+          <svg class="stock-mini-chart" viewBox="0 0 60 36" preserveAspectRatio="none">
+            <polyline points="0,30 10,25 20,27 30,20 40,15 50,10 60,8" stroke="#30d158" stroke-width="1.5" fill="none"/>
+          </svg>
+          <div class="stock-price-info">
+            <div class="stock-price">₱112.80</div>
+            <div class="stock-badge up">+3.8%</div>
+          </div>
+        </div>
+
+        <div class="stock-card up">
+          <div class="stock-logo" style="background:linear-gradient(135deg,#5e5ce6,#3634a3);color:#fff;">AC</div>
+          <div class="stock-info">
+            <div class="stock-ticker">AC</div>
+            <div class="stock-name">Ayala Corporation</div>
+            <div class="stock-shares">Sector: Conglomerate</div>
+          </div>
+          <svg class="stock-mini-chart" viewBox="0 0 60 36" preserveAspectRatio="none">
+            <polyline points="0,28 10,30 20,22 30,18 40,20 50,12 60,6" stroke="#30d158" stroke-width="1.5" fill="none"/>
+          </svg>
+          <div class="stock-price-info">
+            <div class="stock-price">₱658.00</div>
+            <div class="stock-badge up">+2.9%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="section-label" style="color:var(--blue);">⚡ Momentum Picks</div>
+      <div class="rec-cards">
+        <div class="rec-card">
+          <div class="rec-card-top">
+            <div class="rec-card-left">
+              <div class="stock-logo" style="background:linear-gradient(135deg,#30d158,#1a7a35);color:#fff;width:40px;height:40px;font-size:12px;">SMPH</div>
+              <div>
+                <div class="stock-ticker">SMPH</div>
+                <div style="display:flex;gap:6px;margin-top:4px;"><span class="rec-tag buy">BUY</span><span class="rec-tag watch">Strong Vol.</span></div>
+              </div>
+            </div>
+            <div class="stock-price-info">
+              <div style="font-size:15px;font-weight:600;">₱33.40</div>
+              <div style="font-size:11px;color:var(--text3);text-align:right;">Target ₱38</div>
+            </div>
+          </div>
+          <div class="rec-reason">SMPH is recovering strongly on mall footfall data exceeding pre-pandemic levels. Q1 net income beat estimates by 12%, signaling robust consumer spending.</div>
+          <div class="rec-metrics">
+            <div class="rec-metric"><div class="rec-metric-label">P/E Ratio</div><div class="rec-metric-value">22.4x</div></div>
+            <div class="rec-metric"><div class="rec-metric-label">52W High</div><div class="rec-metric-value">₱36.80</div></div>
+            <div class="rec-metric"><div class="rec-metric-label">Upside</div><div class="rec-metric-value" style="color:var(--green);">+13.8%</div></div>
+          </div>
+        </div>
+
+        <div class="rec-card">
+          <div class="rec-card-top">
+            <div class="rec-card-left">
+              <div class="stock-logo" style="background:linear-gradient(135deg,#ff9f0a,#c35a00);color:#fff;width:40px;height:40px;font-size:12px;">MBT</div>
+              <div>
+                <div class="stock-ticker">MBT</div>
+                <div style="display:flex;gap:6px;margin-top:4px;"><span class="rec-tag buy">BUY</span></div>
+              </div>
+            </div>
+            <div class="stock-price-info">
+              <div style="font-size:15px;font-weight:600;">₱78.50</div>
+              <div style="font-size:11px;color:var(--text3);text-align:right;">Target ₱90</div>
+            </div>
+          </div>
+          <div class="rec-reason">Metrobank is trading at a discount to book value with rising net interest margins. BSP rate environment remains favorable for banks in 2026.</div>
+          <div class="rec-metrics">
+            <div class="rec-metric"><div class="rec-metric-label">P/B Ratio</div><div class="rec-metric-value">0.92x</div></div>
+            <div class="rec-metric"><div class="rec-metric-label">Dividend</div><div class="rec-metric-value" style="color:var(--green);">2.8%</div></div>
+            <div class="rec-metric"><div class="rec-metric-label">Upside</div><div class="rec-metric-value" style="color:var(--green);">+14.6%</div></div>
+          </div>
+        </div>
+
+        <div class="rec-card">
+          <div class="rec-card-top">
+            <div class="rec-card-left">
+              <div class="stock-logo" style="background:linear-gradient(135deg,#ffd60a,#b89200);color:#000;width:40px;height:40px;font-size:12px;">URC</div>
+              <div>
+                <div class="stock-ticker">URC</div>
+                <div style="display:flex;gap:6px;margin-top:4px;"><span class="rec-tag buy">BUY</span></div>
+              </div>
+            </div>
+            <div class="stock-price-info">
+              <div style="font-size:15px;font-weight:600;">₱112.80</div>
+              <div style="font-size:11px;color:var(--text3);text-align:right;">Target ₱128</div>
+            </div>
+          </div>
+          <div class="rec-reason">URC's ASEAN expansion and new snack product lines are gaining traction. Revenue growth of 8% YoY with improving margin outlook.</div>
+          <div class="rec-metrics">
+            <div class="rec-metric"><div class="rec-metric-label">P/E Ratio</div><div class="rec-metric-value">18.2x</div></div>
+            <div class="rec-metric"><div class="rec-metric-label">ROE</div><div class="rec-metric-value">11.4%</div></div>
+            <div class="rec-metric"><div class="rec-metric-label">Upside</div><div class="rec-metric-value" style="color:var(--green);">+13.5%</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="divider"></div>
+    </div>
+
+    <!-- SCREEN 3: ADVISOR -->
+    <div class="screen" id="screen-advisor">
+      <div class="screen-header">
+        <div class="screen-title">AI Advisor</div>
+      </div>
+
+      <div class="advisor-area">
+        <!-- Hold/Sell Recommendations -->
+        <div class="section-label" style="padding-left:0;padding-top:8px;">Your Holdings Analysis</div>
+
+        <div class="rec-cards">
+          <!-- JFC -->
+          <div class="rec-card">
+            <div class="rec-card-top">
+              <div class="rec-card-left">
+                <div class="stock-logo" style="background:linear-gradient(135deg,#e63946,#a8201a);color:#fff;width:40px;height:40px;font-size:12px;">JFC</div>
+                <div>
+                  <div class="stock-ticker">JFC · Jollibee</div>
+                  <div style="display:flex;gap:6px;margin-top:4px;"><span class="rec-tag hold">HOLD</span></div>
+                </div>
+              </div>
+              <div class="stock-price-info">
+                <div style="font-size:15px;font-weight:600;color:var(--green);">+₱1,650</div>
+                <div style="font-size:11px;color:var(--text3);text-align:right;">unrealized</div>
+              </div>
+            </div>
+            <div class="rec-reason">You're up 7.6% on JFC. The stock is approaching analyst consensus target of ₱245. Consider holding — international expansion (Smashburger, Tim Ho Wan) is a strong long-term catalyst. Don't sell yet unless you need liquidity.</div>
+            <div class="rec-metrics">
+              <div class="rec-metric"><div class="rec-metric-label">Your Avg</div><div class="rec-metric-value">₱218.00</div></div>
+              <div class="rec-metric"><div class="rec-metric-label">Current</div><div class="rec-metric-value" style="color:var(--green);">₱234.50</div></div>
+              <div class="rec-metric"><div class="rec-metric-label">Target</div><div class="rec-metric-value">₱245.00</div></div>
+            </div>
+          </div>
+
+          <!-- BDO -->
+          <div class="rec-card">
+            <div class="rec-card-top">
+              <div class="rec-card-left">
+                <div class="stock-logo" style="background:linear-gradient(135deg,#0a84ff,#0055b3);color:#fff;width:40px;height:40px;font-size:12px;">BDO</div>
+                <div>
+                  <div class="stock-ticker">BDO · Unibank</div>
+                  <div style="display:flex;gap:6px;margin-top:4px;"><span class="rec-tag sell">TRIM</span><span class="rec-tag hold">or HOLD</span></div>
+                </div>
+              </div>
+              <div class="stock-price-info">
+                <div style="font-size:15px;font-weight:600;color:var(--red);">-₱873</div>
+                <div style="font-size:11px;color:var(--text3);text-align:right;">unrealized</div>
+              </div>
+            </div>
+            <div class="rec-reason">BDO is down 4.1% from your average. The BSP rate cut cycle may compress bank NIMs short-term. If your horizon is 12+ months, hold for recovery to ₱155+. For shorter horizon, consider trimming to reduce exposure.</div>
+            <div class="rec-metrics">
+              <div class="rec-metric"><div class="rec-metric-label">Your Avg</div><div class="rec-metric-value">₱144.00</div></div>
+              <div class="rec-metric"><div class="rec-metric-label">Current</div><div class="rec-metric-value" style="color:var(--red);">₱138.20</div></div>
+              <div class="rec-metric"><div class="rec-metric-label">Target</div><div class="rec-metric-value">₱155.00</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Chat -->
+        <div class="ai-card">
+          <div class="ai-card-header">
+            <div class="ai-icon">✦</div>
+            <div>
+              <div style="font-size:15px;font-weight:600;">PSE Stock Advisor</div>
+              <div style="font-size:12px;color:var(--text3);">Powered by Claude AI</div>
+            </div>
+          </div>
+          <div class="ai-card-body">
+            <div class="chat-messages" id="chatMessages">
+              <div class="chat-msg ai">Hi! I'm your PSE stock advisor. Ask me anything about your JFC and BDO holdings, or any Philippine stock. 📊</div>
+            </div>
+            <div class="quick-prompts" id="quickPrompts">
+              <button class="quick-prompt" onclick="sendQuick('Should I buy more JFC or BDO?')">More JFC or BDO?</button>
+              <button class="quick-prompt" onclick="sendQuick('What PSE stocks should I add to diversify?')">Diversify my portfolio</button>
+              <button class="quick-prompt" onclick="sendQuick('Is now a good time to sell BDO?')">Sell BDO now?</button>
+            </div>
+            <div class="chat-input-area">
+              <textarea class="chat-input" id="chatInput" placeholder="Ask about your stocks…" rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+              <button class="send-btn" onclick="sendMessage()">
+                <svg width="16" height="16" viewBox="0 0 16 16"><path d="M1 1l14 7L1 15V9.5L11 8 1 6.5V1z"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="divider"></div>
+    </div>
+
+  </div><!-- end content-area -->
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <div class="tab-item active" id="tab-portfolio" onclick="switchTab('portfolio')">
+      <div class="tab-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24"><path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zm0 10h8v8h-8v-8zM3 13h8v8H3v-8z"/></svg>
+      </div>
+      <span class="tab-label">Portfolio</span>
+    </div>
+    <div class="tab-item" id="tab-discover" onclick="switchTab('discover')">
+      <div class="tab-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24"><path d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      </div>
+      <span class="tab-label">Discover</span>
+    </div>
+    <div class="tab-item" id="tab-advisor" onclick="switchTab('advisor')">
+      <div class="tab-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+      </div>
+      <span class="tab-label">Advisor</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// Clock
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent = now.getHours() + ':' + String(now.getMinutes()).padStart(2,'0');
+}
+updateClock();
+setInterval(updateClock, 10000);
+
+// Tab switching
+function switchTab(tab) {
+  ['portfolio','discover','advisor'].forEach(t => {
+    document.getElementById('screen-'+t).classList.remove('active');
+    document.getElementById('tab-'+t).classList.remove('active');
+  });
+  document.getElementById('screen-'+tab).classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.getElementById('contentArea').scrollTop = 0;
+}
+
+// Period tabs
+document.querySelectorAll('.period-tab').forEach(t => {
+  t.addEventListener('click', function() {
+    document.querySelectorAll('.period-tab').forEach(x => x.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// AI Chat
+const SYSTEM_PROMPT = `You are a concise Philippine Stock Exchange (PSE) stock advisor. 
+The user holds:
+- JFC (Jollibee Foods Corporation): 100 shares at avg ₱218.00, current price ₱234.50 (+7.6% gain)
+- BDO (BDO Unibank): 150 shares at avg ₱144.00, current price ₱138.20 (-4.1% loss)
+Total portfolio value: ~₱47,831
+
+Give practical, actionable advice. Keep responses under 120 words. Use Philippine Peso (₱). Be direct and helpful. Reference PSE-listed stocks only.`;
+
+let chatHistory = [];
+
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  autoResize(input);
+
+  // Hide quick prompts
+  document.getElementById('quickPrompts').style.display = 'none';
+
+  appendMsg(msg, 'user');
+  chatHistory.push({ role: 'user', content: msg });
+
+  // Typing indicator
+  const typing = document.createElement('div');
+  typing.className = 'typing-indicator';
+  typing.id = 'typing';
+  typing.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+  document.getElementById('chatMessages').appendChild(typing);
+  scrollChat();
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: chatHistory
+      })
+    });
+    const data = await res.json();
+    const reply = data.content?.[0]?.text || 'Sorry, I could not get a response right now.';
+    chatHistory.push({ role: 'assistant', content: reply });
+    typing.remove();
+    appendMsg(reply, 'ai');
+  } catch (e) {
+    typing.remove();
+    appendMsg('Network error. Please try again.', 'ai');
+  }
+}
+
+function appendMsg(text, role) {
+  const el = document.createElement('div');
+  el.className = 'chat-msg ' + role;
+  el.textContent = text;
+  document.getElementById('chatMessages').appendChild(el);
+  scrollChat();
+}
+
+function scrollChat() {
+  const msgs = document.getElementById('chatMessages');
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function sendQuick(text) {
+  document.getElementById('chatInput').value = text;
+  sendMessage();
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+function openDetail(ticker) {
+  switchTab('advisor');
+}
+</script>
+</body>
+</html>
