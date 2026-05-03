@@ -10,7 +10,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="PSE Stocks">
 <meta name="theme-color" content="#000000">
-<link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 :root{
@@ -18,368 +17,592 @@
   --border:rgba(255,255,255,0.08);
   --text1:#fff;--text2:#ebebf5cc;--text3:#ebebf599;
   --green:#30d158;--red:#ff453a;--blue:#0a84ff;--yellow:#ffd60a;
-  --font:-apple-system,'SF Pro Display','Helvetica Neue',sans-serif;
+  --font:-apple-system,'Helvetica Neue',sans-serif;
 }
-body{background:var(--bg);color:var(--text1);font-family:var(--font);max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden;}
-.phone-frame{background:var(--bg);min-height:100vh;display:flex;flex-direction:column;}
-.status-bar{display:flex;justify-content:space-between;align-items:center;padding:14px 24px 0;height:50px;}
+body{background:var(--bg);color:var(--text1);font-family:var(--font);max-width:430px;margin:0 auto;min-height:100vh;}
+.frame{min-height:100vh;display:flex;flex-direction:column;}
+/* STATUS */
+.status{display:flex;justify-content:space-between;align-items:center;padding:14px 24px 0;height:50px;flex-shrink:0;}
 .status-time{font-size:15px;font-weight:600;}
-.status-icons{display:flex;gap:6px;align-items:center;}
-.status-icons svg{fill:white;}
-.content-area{flex:1;overflow-y:auto;padding-bottom:90px;scroll-behavior:smooth;}
+.status-icons{display:flex;gap:5px;align-items:center;}
+/* TABS */
+.tab-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(0,0,0,0.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:0.5px solid var(--border);padding:10px 0 24px;display:flex;z-index:100;}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 0;}
+.tab-ic{width:26px;height:26px;display:flex;align-items:center;justify-content:center;}
+.tab-ic svg{transition:fill 0.2s;}
+.tab-lbl{font-size:10px;font-weight:500;color:#636366;transition:color 0.2s;}
+.tab.active .tab-lbl{color:#fff;}
+.tab.active .tab-ic svg{fill:#fff;}
+.tab:not(.active) .tab-ic svg{fill:#636366;}
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding-bottom:90px;}
 .screen{display:none;}
 .screen.active{display:block;}
-.screen-header{padding:8px 20px 12px;position:sticky;top:0;background:var(--bg);z-index:10;border-bottom:0.5px solid var(--border);}
-.screen-title{font-size:34px;font-weight:700;letter-spacing:-0.5px;margin-bottom:12px;}
-.search-bar{background:var(--bg4);border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:8px;color:var(--text3);font-size:15px;}
-.portfolio-summary{padding:24px 20px 16px;text-align:center;}
-.total-label{font-size:13px;color:var(--text3);margin-bottom:6px;}
-.total-value{font-size:44px;font-weight:300;letter-spacing:-1px;margin-bottom:8px;}
-.total-change{display:inline-flex;align-items:center;gap:6px;font-size:16px;padding:5px 14px;border-radius:20px;font-weight:500;}
-.total-change.up{background:rgba(48,209,88,0.15);color:var(--green);}
-.total-change.down{background:rgba(255,69,58,0.15);color:var(--red);}
-.portfolio-chart{margin:0 20px 20px;background:var(--bg3);border-radius:16px;padding:16px;overflow:hidden;}
-.chart-period-tabs{display:flex;gap:4px;margin-bottom:14px;}
-.period-tab{flex:1;text-align:center;padding:5px 0;font-size:13px;font-weight:500;color:var(--text3);border-radius:8px;cursor:pointer;transition:all 0.2s;border:none;background:none;font-family:var(--font);}
-.period-tab.active{background:var(--bg4);color:var(--text1);}
-.sparkline-container{height:80px;}
-.sparkline-container svg{width:100%;height:100%;}
-.section-label{font-size:22px;font-weight:700;padding:16px 20px 10px;letter-spacing:-0.3px;}
-.stock-list{padding:0 12px;}
-.stock-card{background:var(--bg3);border-radius:14px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:background 0.15s;position:relative;overflow:hidden;}
-.stock-card:active{background:var(--bg4);}
-.stock-card::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px;}
-.stock-card.up::after{background:var(--green);}
-.stock-card.down::after{background:var(--red);}
-.stock-logo{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;letter-spacing:-0.5px;}
-.stock-info{flex:1;min-width:0;}
-.stock-ticker{font-size:16px;font-weight:600;}
-.stock-name{font-size:12px;color:var(--text3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.stock-shares{font-size:11px;color:var(--text3);margin-top:3px;}
-.stock-mini-chart{width:60px;height:36px;flex-shrink:0;}
-.stock-price-info{text-align:right;flex-shrink:0;}
-.stock-price{font-size:16px;font-weight:600;}
-.stock-badge{display:inline-block;font-size:12px;font-weight:600;padding:3px 8px;border-radius:6px;margin-top:4px;}
-.stock-badge.up{background:var(--green);color:#000;}
-.stock-badge.down{background:var(--red);color:#fff;}
-.rec-cards{padding:0 12px;}
-.rec-card{background:var(--bg3);border-radius:16px;padding:18px;margin-bottom:10px;}
-.rec-card.priority{border:1.5px solid rgba(48,209,88,0.35);}
-.rec-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-.rec-card-left{display:flex;align-items:center;gap:12px;}
-.rec-tag{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;}
-.rec-tag.buy{background:rgba(48,209,88,0.2);color:var(--green);}
-.rec-tag.hold{background:rgba(255,214,10,0.2);color:var(--yellow);}
-.rec-tag.sell{background:rgba(255,69,58,0.2);color:var(--red);}
-.rec-tag.watch{background:rgba(10,132,255,0.2);color:var(--blue);}
-.rec-tag.priority-tag{background:rgba(48,209,88,0.15);color:var(--green);font-size:10px;}
-.rec-reason{font-size:13px;color:var(--text2);line-height:1.55;margin-bottom:12px;}
-.rec-metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
-.rec-metric{background:var(--bg4);border-radius:10px;padding:8px 10px;text-align:center;}
-.rec-metric-label{font-size:10px;color:var(--text3);margin-bottom:3px;}
-.rec-metric-value{font-size:13px;font-weight:600;}
-.advisor-area{padding:16px 12px;}
-.section-sub{font-size:13px;color:var(--text3);padding:0 0 12px;line-height:1.5;}
-.allocation-card{background:var(--bg3);border-radius:16px;padding:18px;margin:0 12px 10px;}
-.allocation-title{font-size:15px;font-weight:600;margin-bottom:14px;color:var(--text2);}
-.allocation-inner{display:flex;align-items:center;gap:16px;}
-.donut-wrap{position:relative;flex-shrink:0;}
-.allocation-legend{flex:1;display:flex;flex-direction:column;gap:8px;}
-.legend-item{display:flex;align-items:center;gap:8px;}
-.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-.legend-name{font-size:13px;color:var(--text2);flex:1;}
-.legend-pct{font-size:13px;font-weight:600;}
+/* HEADER */
+.hdr{padding:8px 20px 10px;position:sticky;top:0;background:var(--bg);z-index:10;border-bottom:0.5px solid var(--border);}
+.hdr-title{font-size:34px;font-weight:700;letter-spacing:-0.5px;margin-bottom:10px;}
+/* SEARCH */
+.search-wrap{position:relative;}
+.search-box{width:100%;background:var(--bg4);border:none;border-radius:12px;padding:10px 36px;color:var(--text1);font-size:15px;font-family:var(--font);outline:none;}
+.search-box::placeholder{color:var(--text3);}
+.search-ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:15px;pointer-events:none;}
+.search-x{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.2);border:none;border-radius:50%;width:18px;height:18px;color:#fff;font-size:10px;cursor:pointer;display:none;align-items:center;justify-content:center;font-family:var(--font);}
+.search-drop{position:absolute;left:0;right:0;top:calc(100% + 6px);background:var(--bg3);border-radius:14px;border:0.5px solid var(--border);z-index:50;display:none;max-height:300px;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.6);}
+.s-item{display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer;border-bottom:0.5px solid var(--border);}
+.s-item:last-child{border-bottom:none;}
+.s-item:active{background:var(--bg4);}
+/* DATA STATUS BAR */
+.data-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 20px 2px;font-size:12px;color:var(--text3);}
+.live-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:4px;background:var(--green);animation:pulse 2s infinite;}
+.live-dot.error{background:var(--red);animation:none;}
+.live-dot.loading{background:var(--yellow);}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.refresh-btn{background:none;border:none;color:var(--blue);font-size:12px;font-family:var(--font);cursor:pointer;padding:3px 8px;border-radius:8px;}
+.refresh-btn:active{background:var(--bg4);}
+/* ERROR BANNER */
+.err-banner{margin:8px 12px;background:rgba(255,69,58,0.1);border:0.5px solid rgba(255,69,58,0.3);border-radius:12px;padding:12px 14px;display:none;}
+.err-banner.show{display:block;}
+.err-title{font-size:13px;font-weight:600;color:var(--red);margin-bottom:3px;}
+.err-msg{font-size:12px;color:var(--text2);line-height:1.5;}
+/* SUMMARY */
+.summary{padding:16px 20px 12px;text-align:center;}
+.sum-lbl{font-size:12px;color:var(--text3);margin-bottom:4px;letter-spacing:0.5px;}
+.sum-val{font-size:44px;font-weight:300;letter-spacing:-1px;margin-bottom:8px;}
+.sum-chg{display:inline-flex;align-items:center;gap:6px;font-size:15px;padding:5px 14px;border-radius:20px;font-weight:500;}
+.sum-chg.up{background:rgba(48,209,88,0.15);color:var(--green);}
+.sum-chg.down{background:rgba(255,69,58,0.15);color:var(--red);}
+.sum-chg.flat{background:var(--bg4);color:var(--text3);}
+/* CHART */
+.chart-wrap{margin:0 16px 14px;background:var(--bg3);border-radius:16px;padding:14px;}
+.period-tabs{display:flex;gap:3px;margin-bottom:10px;}
+.ptab{flex:1;text-align:center;padding:5px 0;font-size:12px;font-weight:500;color:var(--text3);border-radius:8px;cursor:pointer;border:none;background:none;font-family:var(--font);}
+.ptab.active{background:var(--bg4);color:var(--text1);}
+.spark{height:65px;}
+.spark svg{width:100%;height:100%;}
+/* PERF GRID */
+.perf{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 12px 12px;}
+.pcell{background:var(--bg3);border-radius:12px;padding:12px;}
+.plbl{font-size:11px;color:var(--text3);margin-bottom:4px;}
+.pval{font-size:18px;font-weight:600;}
+/* ALLOC */
+.alloc-card{background:var(--bg3);border-radius:16px;padding:16px;margin:0 12px 12px;}
+.alloc-title{font-size:14px;font-weight:600;margin-bottom:12px;color:var(--text2);}
+.alloc-row{display:flex;align-items:center;gap:14px;}
+.lgnd{flex:1;display:flex;flex-direction:column;gap:8px;}
+.lgnd-item{display:flex;align-items:center;gap:8px;}
+.lgnd-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.lgnd-name{font-size:13px;color:var(--text2);flex:1;}
+.lgnd-pct{font-size:13px;font-weight:600;}
+/* SECTION */
+.sec-title{font-size:22px;font-weight:700;padding:12px 20px 8px;letter-spacing:-0.3px;}
+/* STOCK CARDS */
+.slist{padding:0 12px;}
+.scard{background:var(--bg3);border-radius:14px;padding:13px 15px;margin-bottom:8px;display:flex;align-items:center;gap:11px;cursor:pointer;transition:background 0.15s;position:relative;overflow:hidden;}
+.scard:active{background:var(--bg4);}
+.scard::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;}
+.scard.up::before{background:var(--green);}
+.scard.down::before{background:var(--red);}
+.scard.flat::before{background:var(--bg4);}
+.scard.loading::before{background:var(--text3);}
+.slogo{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+.sinfo{flex:1;min-width:0;}
+.sticker{font-size:15px;font-weight:600;}
+.sname{font-size:11px;color:var(--text3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ssub{font-size:11px;color:var(--text3);margin-top:2px;}
+.schartw{width:52px;height:30px;flex-shrink:0;}
+.spinfo{text-align:right;flex-shrink:0;}
+.sprice{font-size:15px;font-weight:600;}
+.sbadge{display:inline-block;font-size:11px;font-weight:600;padding:2px 7px;border-radius:6px;margin-top:3px;}
+.sbadge.up{background:var(--green);color:#000;}
+.sbadge.down{background:var(--red);color:#fff;}
+.sbadge.flat{background:var(--bg4);color:var(--text2);}
+/* SKELETON */
+.skel{background:linear-gradient(90deg,var(--bg3) 25%,var(--bg4) 50%,var(--bg3) 75%);background-size:200% 100%;animation:shim 1.4s infinite;border-radius:6px;display:inline-block;}
+@keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
+/* REC CARDS */
+.rcards{padding:0 12px;}
+.rcard{background:var(--bg3);border-radius:16px;padding:16px;margin-bottom:10px;}
+.rcard.prio{border:1.5px solid rgba(48,209,88,0.3);}
+.rtop{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.rtop-left{display:flex;align-items:center;gap:10px;}
+.rtag{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;}
+.rtag.buy{background:rgba(48,209,88,0.2);color:var(--green);}
+.rtag.hold{background:rgba(255,214,10,0.2);color:var(--yellow);}
+.rtag.sell{background:rgba(255,69,58,0.2);color:var(--red);}
+.rtag.watch{background:rgba(10,132,255,0.2);color:var(--blue);}
+.rreason{font-size:13px;color:var(--text2);line-height:1.55;margin-bottom:10px;}
+.rmetrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;}
+.rmet{background:var(--bg4);border-radius:9px;padding:8px;text-align:center;}
+.rmet-lbl{font-size:10px;color:var(--text3);margin-bottom:2px;}
+.rmet-val{font-size:13px;font-weight:600;}
+.insight{font-size:12px;color:var(--blue);background:rgba(10,132,255,0.08);border-radius:8px;padding:8px 10px;margin-bottom:10px;line-height:1.5;}
+.pbadge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:10px;display:inline-block;}
+/* ADVISOR */
+.adv-area{padding:14px 12px;}
+.sec-sub{font-size:13px;color:var(--text3);padding:0 0 10px;line-height:1.5;}
+.disc{margin:4px 0 16px;padding:12px 14px;background:var(--bg3);border-radius:12px;border-left:3px solid var(--yellow);}
+.disc-t{font-size:11px;font-weight:600;color:var(--yellow);margin-bottom:3px;}
+.disc-b{font-size:12px;color:var(--text3);line-height:1.55;}
+/* TOAST */
+.toast{position:fixed;top:58px;left:50%;transform:translateX(-50%);background:var(--bg3);border:0.5px solid var(--border);color:var(--text1);font-size:13px;padding:9px 18px;border-radius:20px;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,0.5);}
+.toast.show{opacity:1;}
 .divider{height:8px;}
-.update-toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:var(--blue);color:#fff;font-size:13px;font-weight:600;padding:10px 20px;border-radius:20px;z-index:999;opacity:0;transition:opacity 0.4s;pointer-events:none;white-space:nowrap;}
-.update-toast.visible{opacity:1;}
-.tab-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(0,0,0,0.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:0.5px solid var(--border);padding:10px 0 24px;display:flex;z-index:100;}
-.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:4px 0;}
-.tab-icon{width:26px;height:26px;display:flex;align-items:center;justify-content:center;}
-.tab-icon svg{transition:fill 0.2s;}
-.tab-label{font-size:10px;font-weight:500;color:#636366;transition:color 0.2s;}
-.tab-item.active .tab-label{color:#fff;}
-.tab-item.active .tab-icon svg{fill:#fff;}
-.tab-item:not(.active) .tab-icon svg{fill:#636366;}
 </style>
 </head>
 <body>
-<div class="phone-frame">
-  <div class="status-bar">
-    <span class="status-time" id="clock">9:41</span>
+<div class="frame">
+  <div class="status">
+    <span class="status-time" id="clk"></span>
     <div class="status-icons">
-      <svg width="17" height="12" viewBox="0 0 17 12"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="2" width="3" height="10" rx="1"/><rect x="9" y="0.5" width="3" height="11.5" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity="0.35"/></svg>
-      <svg width="16" height="12" viewBox="0 0 16 12"><path d="M8 2.4C5.6 2.4 3.5 3.4 2 5L0 3C2.1 1.1 4.9 0 8 0s5.9 1.1 8 3l-2 2C12.5 3.4 10.4 2.4 8 2.4z"/><path d="M8 6.8c-1.4 0-2.6.5-3.5 1.4L2.5 6.2C3.9 4.8 5.8 4 8 4s4.1.8 5.5 2.2L11.5 8.2C10.6 7.3 9.4 6.8 8 6.8z"/><circle cx="8" cy="11" r="1.5"/></svg>
-      <svg width="25" height="12" viewBox="0 0 25 12"><rect x="0" y="1" width="21" height="10" rx="3" stroke="white" stroke-width="1" fill="none" opacity="0.35"/><rect x="22" y="4" width="3" height="4" rx="1" fill="white" opacity="0.4"/><rect x="1.5" y="2.5" width="16" height="7" rx="1.5" fill="white"/></svg>
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="white"><rect x="0" y="4" width="3" height="8" rx="1"/><rect x="4.5" y="2.5" width="3" height="9.5" rx="1"/><rect x="9" y="1" width="3" height="11" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity="0.3"/></svg>
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="white"><path d="M8 2.4C5.6 2.4 3.5 3.4 2 5L0 3C2.1 1.1 4.9 0 8 0s5.9 1.1 8 3l-2 2C12.5 3.4 10.4 2.4 8 2.4z"/><path d="M8 6.8c-1.4 0-2.6.5-3.5 1.4L2.5 6.2C3.9 4.8 5.8 4 8 4s4.1.8 5.5 2.2L11.5 8.2C10.6 7.3 9.4 6.8 8 6.8z"/><circle cx="8" cy="11" r="1.5"/></svg>
+      <svg width="25" height="12" viewBox="0 0 25 12" fill="white"><rect x="0" y="1" width="21" height="10" rx="3" stroke="white" stroke-width="1" fill="none" opacity="0.35"/><rect x="22" y="4" width="3" height="4" rx="1" fill="white" opacity="0.4"/><rect x="1.5" y="2.5" width="16" height="7" rx="1.5" fill="white"/></svg>
     </div>
   </div>
 
-  <div class="update-toast" id="updateToast">App updated</div>
+  <div class="toast" id="toast"></div>
 
-  <div class="content-area" id="contentArea">
+  <div class="content" id="content">
 
     <!-- PORTFOLIO -->
-    <div class="screen active" id="screen-portfolio">
-      <div class="screen-header">
-        <div class="screen-title">My Portfolio</div>
-        <div class="search-bar"><span style="opacity:0.5">&#128269;</span>&nbsp;Search PSE stocks&hellip;</div>
-      </div>
-      <div class="portfolio-summary">
-        <div class="total-label">TOTAL VALUE</div>
-        <div class="total-value">&#8369;44,180</div>
-        <div class="total-change up">&#9650; +&#8369;780 &nbsp;+1.80% total return</div>
-      </div>
-      <div class="portfolio-chart">
-        <div class="chart-period-tabs">
-          <button class="period-tab" onclick="setChart(event,'1D')">1D</button>
-          <button class="period-tab active" onclick="setChart(event,'1W')">1W</button>
-          <button class="period-tab" onclick="setChart(event,'1M')">1M</button>
-          <button class="period-tab" onclick="setChart(event,'3M')">3M</button>
-          <button class="period-tab" onclick="setChart(event,'1Y')">1Y</button>
+    <div class="screen active" id="s-portfolio">
+      <div class="hdr">
+        <div class="hdr-title">My Portfolio</div>
+        <div class="search-wrap">
+          <span class="search-ico">&#128269;</span>
+          <input class="search-box" id="q1" placeholder="Search PSE stocks..." oninput="doSearch(this.value,'d1')" autocomplete="off" spellcheck="false">
+          <button class="search-x" id="x1" onclick="clrSearch('q1','d1')">&#10005;</button>
+          <div class="search-drop" id="d1"></div>
         </div>
-        <div class="sparkline-container">
-          <svg id="sparklineSvg" viewBox="0 0 320 80" preserveAspectRatio="none">
-            <defs><linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#30d158" stop-opacity="0.25"/><stop offset="100%" stop-color="#30d158" stop-opacity="0"/></linearGradient></defs>
-            <path id="sparklineFill" fill="url(#lineGrad)"/>
-            <path id="sparklineLine" stroke="#30d158" stroke-width="2" fill="none"/>
+      </div>
+      <div class="data-bar">
+        <span><span class="live-dot" id="dot"></span><span id="lastUpd">Fetching live prices...</span></span>
+        <button class="refresh-btn" onclick="loadPrices(true)">&#8635; Refresh</button>
+      </div>
+      <div class="err-banner" id="errBanner">
+        <div class="err-title">Could not fetch live prices</div>
+        <div class="err-msg" id="errMsg">Showing last known data. Tap Refresh to try again. Make sure you are connected to the internet.</div>
+      </div>
+      <div class="summary">
+        <div class="sum-lbl">TOTAL PORTFOLIO VALUE</div>
+        <div class="sum-val" id="totVal">&#8369;--</div>
+        <div class="sum-chg flat" id="totChg">Loading prices...</div>
+      </div>
+      <div class="chart-wrap">
+        <div class="period-tabs">
+          <button class="ptab" onclick="setChart(event,'1D')">1D</button>
+          <button class="ptab active" onclick="setChart(event,'1W')">1W</button>
+          <button class="ptab" onclick="setChart(event,'1M')">1M</button>
+          <button class="ptab" onclick="setChart(event,'3M')">3M</button>
+          <button class="ptab" onclick="setChart(event,'1Y')">1Y</button>
+        </div>
+        <div class="spark"><svg id="spSvg" viewBox="0 0 320 65" preserveAspectRatio="none">
+          <defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#30d158" stop-opacity="0.2"/><stop offset="100%" stop-color="#30d158" stop-opacity="0"/></linearGradient></defs>
+          <path id="spFill" fill="url(#sg)"/><path id="spLine" stroke="#30d158" stroke-width="1.8" fill="none"/>
+        </svg></div>
+      </div>
+      <div class="perf">
+        <div class="pcell"><div class="plbl">Total Gain / Loss</div><div class="pval" id="pg">--</div></div>
+        <div class="pcell"><div class="plbl">Return %</div><div class="pval" id="pr">--</div></div>
+        <div class="pcell"><div class="plbl">Day P&amp;L</div><div class="pval" id="pd">--</div></div>
+        <div class="pcell"><div class="plbl">Cost Basis</div><div class="pval">&#8369;43,400</div></div>
+      </div>
+      <div class="alloc-card">
+        <div class="alloc-title">Allocation</div>
+        <div class="alloc-row">
+          <svg width="84" height="84" viewBox="0 0 84 84" flex-shrink="0">
+            <circle cx="42" cy="42" r="32" fill="none" stroke="#2c2c2e" stroke-width="11"/>
+            <circle cx="42" cy="42" r="32" fill="none" stroke="#30d158" stroke-width="11" id="dJFC" transform="rotate(-90 42 42)"/>
+            <circle cx="42" cy="42" r="32" fill="none" stroke="#0a84ff" stroke-width="11" id="dBDO" transform="rotate(-90 42 42)"/>
           </svg>
-        </div>
-      </div>
-      <div class="allocation-card">
-        <div class="allocation-title">Allocation</div>
-        <div class="allocation-inner">
-          <div class="donut-wrap">
-            <svg width="90" height="90" viewBox="0 0 90 90">
-              <circle cx="45" cy="45" r="35" fill="none" stroke="#2c2c2e" stroke-width="12"/>
-              <circle cx="45" cy="45" r="35" fill="none" stroke="#30d158" stroke-width="12" stroke-dasharray="116.8 103.1" transform="rotate(-90 45 45)"/>
-              <circle cx="45" cy="45" r="35" fill="none" stroke="#0a84ff" stroke-width="12" stroke-dasharray="103.1 116.8" stroke-dashoffset="-116.8" transform="rotate(-90 45 45)"/>
-            </svg>
-          </div>
-          <div class="allocation-legend">
-            <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div><span class="legend-name">JFC</span><span class="legend-pct" style="color:var(--green)">53.1%</span></div>
-            <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div><span class="legend-name">BDO</span><span class="legend-pct" style="color:var(--blue)">46.9%</span></div>
+          <div class="lgnd">
+            <div class="lgnd-item"><div class="lgnd-dot" style="background:#30d158"></div><span class="lgnd-name">JFC</span><span class="lgnd-pct" style="color:#30d158" id="aJFC">--</span></div>
+            <div class="lgnd-item"><div class="lgnd-dot" style="background:#0a84ff"></div><span class="lgnd-name">BDO</span><span class="lgnd-pct" style="color:#0a84ff" id="aBDO">--</span></div>
           </div>
         </div>
       </div>
-      <div class="section-label">Holdings</div>
-      <div class="stock-list">
-        <div class="stock-card up" onclick="openDetail('JFC')">
-          <div class="stock-logo" style="background:linear-gradient(135deg,#e63946,#a8201a);color:#fff;">JFC</div>
-          <div class="stock-info"><div class="stock-ticker">JFC</div><div class="stock-name">Jollibee Foods Corporation</div><div class="stock-shares">100 shares &middot; Avg &#8369;218.00</div></div>
-          <svg class="stock-mini-chart" viewBox="0 0 60 36" preserveAspectRatio="none"><polyline points="0,28 10,24 20,26 30,18 40,14 50,16 60,10" stroke="#30d158" stroke-width="1.5" fill="none"/></svg>
-          <div class="stock-price-info"><div class="stock-price">&#8369;234.50</div><div class="stock-badge up">+3.1%</div></div>
-        </div>
-        <div class="stock-card down" onclick="openDetail('BDO')">
-          <div class="stock-logo" style="background:linear-gradient(135deg,#0a84ff,#0055b3);color:#fff;">BDO</div>
-          <div class="stock-info"><div class="stock-ticker">BDO</div><div class="stock-name">BDO Unibank Inc.</div><div class="stock-shares">150 shares &middot; Avg &#8369;144.00</div></div>
-          <svg class="stock-mini-chart" viewBox="0 0 60 36" preserveAspectRatio="none"><polyline points="0,10 10,12 20,8 30,14 40,18 50,22 60,26" stroke="#ff453a" stroke-width="1.5" fill="none"/></svg>
-          <div class="stock-price-info"><div class="stock-price">&#8369;138.20</div><div class="stock-badge down">-1.3%</div></div>
-        </div>
-      </div>
-      <div class="divider"></div>
-      <div class="section-label">Performance</div>
-      <div class="stock-list">
-        <div class="stock-card" style="flex-direction:column;align-items:stretch;gap:10px;cursor:default;">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-            <div style="background:var(--bg4);border-radius:10px;padding:12px;"><div style="font-size:11px;color:var(--text3);margin-bottom:4px;">Total Gain/Loss</div><div style="font-size:18px;font-weight:600;color:var(--green);">+&#8369;780</div></div>
-            <div style="background:var(--bg4);border-radius:10px;padding:12px;"><div style="font-size:11px;color:var(--text3);margin-bottom:4px;">Return %</div><div style="font-size:18px;font-weight:600;color:var(--green);">+1.80%</div></div>
-            <div style="background:var(--bg4);border-radius:10px;padding:12px;"><div style="font-size:11px;color:var(--text3);margin-bottom:4px;">Day P&amp;L</div><div style="font-size:18px;font-weight:600;color:var(--green);">+&#8369;432</div></div>
-            <div style="background:var(--bg4);border-radius:10px;padding:12px;"><div style="font-size:11px;color:var(--text3);margin-bottom:4px;">Cost Basis</div><div style="font-size:18px;font-weight:600;">&#8369;43,400</div></div>
-          </div>
-        </div>
-      </div>
+      <div class="sec-title">My Holdings</div>
+      <div class="slist" id="holdList"></div>
       <div class="divider"></div>
     </div>
 
     <!-- DISCOVER -->
-    <div class="screen" id="screen-discover">
-      <div class="screen-header">
-        <div class="screen-title">Discover</div>
-        <div class="search-bar"><span style="opacity:0.5">&#128269;</span>&nbsp;Search PSE stocks&hellip;</div>
+    <div class="screen" id="s-discover">
+      <div class="hdr">
+        <div class="hdr-title">Discover</div>
+        <div class="search-wrap">
+          <span class="search-ico">&#128269;</span>
+          <input class="search-box" id="q2" placeholder="Search PSE stocks..." oninput="doSearch(this.value,'d2')" autocomplete="off" spellcheck="false">
+          <button class="search-x" id="x2" onclick="clrSearch('q2','d2')">&#10005;</button>
+          <div class="search-drop" id="d2"></div>
+        </div>
       </div>
-      <div class="section-label" style="color:var(--green);">Top Performers</div>
-      <div class="stock-list">
-        <div class="stock-card up"><div class="stock-logo" style="background:linear-gradient(135deg,#30d158,#1a7a35);color:#fff;">SMPH</div><div class="stock-info"><div class="stock-ticker">SMPH</div><div class="stock-name">SM Prime Holdings</div><div class="stock-shares">Real Estate</div></div><svg class="stock-mini-chart" viewBox="0 0 60 36" preserveAspectRatio="none"><polyline points="0,32 10,28 20,22 30,16 40,12 50,8 60,4" stroke="#30d158" stroke-width="1.5" fill="none"/></svg><div class="stock-price-info"><div class="stock-price">&#8369;33.40</div><div class="stock-badge up">+4.5%</div></div></div>
-        <div class="stock-card up"><div class="stock-logo" style="background:linear-gradient(135deg,#ffd60a,#b89200);color:#000;">URC</div><div class="stock-info"><div class="stock-ticker">URC</div><div class="stock-name">Universal Robina Corp.</div><div class="stock-shares">Consumer Goods</div></div><svg class="stock-mini-chart" viewBox="0 0 60 36" preserveAspectRatio="none"><polyline points="0,30 10,25 20,27 30,20 40,15 50,10 60,8" stroke="#30d158" stroke-width="1.5" fill="none"/></svg><div class="stock-price-info"><div class="stock-price">&#8369;112.80</div><div class="stock-badge up">+3.8%</div></div></div>
-        <div class="stock-card up"><div class="stock-logo" style="background:linear-gradient(135deg,#5e5ce6,#3634a3);color:#fff;">AC</div><div class="stock-info"><div class="stock-ticker">AC</div><div class="stock-name">Ayala Corporation</div><div class="stock-shares">Conglomerate</div></div><svg class="stock-mini-chart" viewBox="0 0 60 36" preserveAspectRatio="none"><polyline points="0,28 10,30 20,22 30,18 40,20 50,12 60,6" stroke="#30d158" stroke-width="1.5" fill="none"/></svg><div class="stock-price-info"><div class="stock-price">&#8369;658.00</div><div class="stock-badge up">+2.9%</div></div></div>
-        <div class="stock-card up"><div class="stock-logo" style="background:linear-gradient(135deg,#ff9f0a,#c35a00);color:#fff;">MBT</div><div class="stock-info"><div class="stock-ticker">MBT</div><div class="stock-name">Metrobank</div><div class="stock-shares">Banking</div></div><svg class="stock-mini-chart" viewBox="0 0 60 36" preserveAspectRatio="none"><polyline points="0,30 10,26 20,28 30,20 40,16 50,12 60,8" stroke="#30d158" stroke-width="1.5" fill="none"/></svg><div class="stock-price-info"><div class="stock-price">&#8369;78.50</div><div class="stock-badge up">+2.1%</div></div></div>
-      </div>
+      <div class="sec-title" style="color:var(--green)">Top Movers Today</div>
+      <div class="slist" id="topList"></div>
       <div class="divider"></div>
-      <div class="section-label" style="color:var(--blue);">Momentum Picks</div>
-      <div class="rec-cards">
-        <div class="rec-card"><div class="rec-card-top"><div class="rec-card-left"><div class="stock-logo" style="background:linear-gradient(135deg,#30d158,#1a7a35);color:#fff;width:40px;height:40px;font-size:12px;">SMPH</div><div><div class="stock-ticker">SMPH</div><div style="display:flex;gap:6px;margin-top:4px;"><span class="rec-tag buy">BUY</span><span class="rec-tag watch">Strong Vol.</span></div></div></div><div class="stock-price-info"><div style="font-size:15px;font-weight:600;">&#8369;33.40</div><div style="font-size:11px;color:var(--text3)">Target &#8369;38</div></div></div><div class="rec-reason">Mall footfall exceeding pre-pandemic levels. Q1 net income beat estimates by 12%. Trading below historical P/E average.</div><div class="rec-metrics"><div class="rec-metric"><div class="rec-metric-label">P/E</div><div class="rec-metric-value">22.4x</div></div><div class="rec-metric"><div class="rec-metric-label">52W High</div><div class="rec-metric-value">&#8369;36.80</div></div><div class="rec-metric"><div class="rec-metric-label">Upside</div><div class="rec-metric-value" style="color:var(--green)">+13.8%</div></div></div></div>
-        <div class="rec-card"><div class="rec-card-top"><div class="rec-card-left"><div class="stock-logo" style="background:linear-gradient(135deg,#ff9f0a,#c35a00);color:#fff;width:40px;height:40px;font-size:12px;">MBT</div><div><div class="stock-ticker">MBT</div><div style="display:flex;gap:6px;margin-top:4px;"><span class="rec-tag buy">BUY</span></div></div></div><div class="stock-price-info"><div style="font-size:15px;font-weight:600;">&#8369;78.50</div><div style="font-size:11px;color:var(--text3)">Target &#8369;90</div></div></div><div class="rec-reason">Trading below book value at 0.92x. Rising net interest margins and favorable BSP rate environment. Pairs well with your BDO position.</div><div class="rec-metrics"><div class="rec-metric"><div class="rec-metric-label">P/B</div><div class="rec-metric-value">0.92x</div></div><div class="rec-metric"><div class="rec-metric-label">Dividend</div><div class="rec-metric-value" style="color:var(--green)">2.8%</div></div><div class="rec-metric"><div class="rec-metric-label">Upside</div><div class="rec-metric-value" style="color:var(--green)">+14.6%</div></div></div></div>
-        <div class="rec-card"><div class="rec-card-top"><div class="rec-card-left"><div class="stock-logo" style="background:linear-gradient(135deg,#ffd60a,#b89200);color:#000;width:40px;height:40px;font-size:12px;">URC</div><div><div class="stock-ticker">URC</div><div style="display:flex;gap:6px;margin-top:4px;"><span class="rec-tag buy">BUY</span></div></div></div><div class="stock-price-info"><div style="font-size:15px;font-weight:600;">&#8369;112.80</div><div style="font-size:11px;color:var(--text3)">Target &#8369;128</div></div></div><div class="rec-reason">ASEAN expansion gaining traction. Revenue +8% YoY with improving margins. Defensive consumer brand reduces portfolio volatility.</div><div class="rec-metrics"><div class="rec-metric"><div class="rec-metric-label">P/E</div><div class="rec-metric-value">18.2x</div></div><div class="rec-metric"><div class="rec-metric-label">ROE</div><div class="rec-metric-value">11.4%</div></div><div class="rec-metric"><div class="rec-metric-label">Upside</div><div class="rec-metric-value" style="color:var(--green)">+13.5%</div></div></div></div>
-        <div class="rec-card"><div class="rec-card-top"><div class="rec-card-left"><div class="stock-logo" style="background:linear-gradient(135deg,#5e5ce6,#3634a3);color:#fff;width:40px;height:40px;font-size:12px;">AC</div><div><div class="stock-ticker">AC</div><div style="display:flex;gap:6px;margin-top:4px;"><span class="rec-tag buy">BUY</span></div></div></div><div class="stock-price-info"><div style="font-size:15px;font-weight:600;">&#8369;658.00</div><div style="font-size:11px;color:var(--text3)">Target &#8369;750</div></div></div><div class="rec-reason">Conglomerate exposure across real estate, banking (BPI), and telecoms (Globe). Stable long-term compounder, lower volatility than pure-play stocks.</div><div class="rec-metrics"><div class="rec-metric"><div class="rec-metric-label">P/E</div><div class="rec-metric-value">14.8x</div></div><div class="rec-metric"><div class="rec-metric-label">Dividend</div><div class="rec-metric-value" style="color:var(--green)">1.9%</div></div><div class="rec-metric"><div class="rec-metric-label">Upside</div><div class="rec-metric-value" style="color:var(--green)">+14.0%</div></div></div></div>
-      </div>
+      <div class="sec-title" style="color:var(--blue)">Watchlist Picks</div>
+      <div class="rcards" id="watchCards"></div>
       <div class="divider"></div>
     </div>
 
     <!-- ADVISOR -->
-    <div class="screen" id="screen-advisor">
-      <div class="screen-header"><div class="screen-title">Advisor</div></div>
-      <div class="advisor-area">
-
-        <!-- WHAT TO DO WITH YOUR CURRENT STOCKS -->
-        <div class="section-label" style="padding-left:0;padding-top:8px;">What to do with your stocks</div>
-        <p class="section-sub">Based on your current holdings and market conditions.</p>
-        <div class="rec-cards">
-          <div class="rec-card" id="detail-JFC">
-            <div class="rec-card-top">
-              <div class="rec-card-left">
-                <div class="stock-logo" style="background:linear-gradient(135deg,#e63946,#a8201a);color:#fff;width:40px;height:40px;font-size:12px;">JFC</div>
-                <div>
-                  <div class="stock-ticker">JFC &middot; Jollibee</div>
-                  <div style="display:flex;gap:6px;margin-top:4px;"><span class="rec-tag hold">HOLD</span><span style="font-size:11px;font-weight:600;color:var(--green);padding:3px 0;">Don&apos;t sell yet</span></div>
-                </div>
-              </div>
-              <div class="stock-price-info"><div style="font-size:15px;font-weight:600;color:var(--green)">+&#8369;1,650</div><div style="font-size:11px;color:var(--text3)">unrealized gain</div></div>
-            </div>
-            <div class="rec-reason">You are up 7.6% — that is a solid return. JFC has not yet reached analyst targets of &#8369;245&ndash;&#8369;260. International brands (Smashburger, Tim Ho Wan, Milksha) are still growing and the domestic fast food business is resilient. Selling now leaves money on the table. Wait for &#8369;245+ before reconsidering.</div>
-            <div class="rec-metrics">
-              <div class="rec-metric"><div class="rec-metric-label">Your Avg</div><div class="rec-metric-value">&#8369;218.00</div></div>
-              <div class="rec-metric"><div class="rec-metric-label">Current</div><div class="rec-metric-value" style="color:var(--green)">&#8369;234.50</div></div>
-              <div class="rec-metric"><div class="rec-metric-label">Target</div><div class="rec-metric-value">&#8369;245&ndash;260</div></div>
-            </div>
-          </div>
-
-          <div class="rec-card" id="detail-BDO">
-            <div class="rec-card-top">
-              <div class="rec-card-left">
-                <div class="stock-logo" style="background:linear-gradient(135deg,#0a84ff,#0055b3);color:#fff;width:40px;height:40px;font-size:12px;">BDO</div>
-                <div>
-                  <div class="stock-ticker">BDO &middot; Unibank</div>
-                  <div style="display:flex;gap:6px;margin-top:4px;"><span class="rec-tag hold">HOLD</span><span style="font-size:11px;font-weight:600;color:var(--yellow);padding:3px 0;">Don&apos;t panic sell</span></div>
-                </div>
-              </div>
-              <div class="stock-price-info"><div style="font-size:15px;font-weight:600;color:var(--red)">-&#8369;870</div><div style="font-size:11px;color:var(--text3)">unrealized loss</div></div>
-            </div>
-            <div class="rec-reason">You are only down 4% &mdash; a small loss, not a reason to exit. BDO is the largest bank in the Philippines by assets. The dip is macro-driven by BSP rate cut expectations compressing margins, not a problem with BDO itself. If you can wait 12&ndash;18 months, recovery to &#8369;150+ is realistic. Only sell if you urgently need the cash.</div>
-            <div class="rec-metrics">
-              <div class="rec-metric"><div class="rec-metric-label">Your Avg</div><div class="rec-metric-value">&#8369;144.00</div></div>
-              <div class="rec-metric"><div class="rec-metric-label">Current</div><div class="rec-metric-value" style="color:var(--red)">&#8369;138.20</div></div>
-              <div class="rec-metric"><div class="rec-metric-label">Target</div><div class="rec-metric-value">&#8369;150&ndash;155</div></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- WHAT TO BUY NEXT -->
-        <div class="section-label" style="padding-left:0;padding-top:8px;">What to buy next</div>
-        <p class="section-sub">Ranked by priority. Buy in small tranches &mdash; don&apos;t go all-in at once.</p>
-        <div class="rec-cards">
-
-          <!-- #1 SMPH -->
-          <div class="rec-card priority">
-            <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
-              <span style="font-size:11px;font-weight:700;color:var(--green);background:rgba(48,209,88,0.12);padding:3px 10px;border-radius:20px;">&#35;1 PRIORITY</span>
-              <span style="font-size:11px;color:var(--text3)">Strongest near-term case</span>
-            </div>
-            <div class="rec-card-top">
-              <div class="rec-card-left">
-                <div class="stock-logo" style="background:linear-gradient(135deg,#30d158,#1a7a35);color:#fff;width:40px;height:40px;font-size:12px;">SMPH</div>
-                <div><div class="stock-ticker">SM Prime Holdings</div><div style="display:flex;gap:6px;margin-top:4px;"><span class="rec-tag buy">BUY</span></div></div>
-              </div>
-              <div class="stock-price-info"><div style="font-size:15px;font-weight:600;">&#8369;33.40</div><div style="font-size:11px;color:var(--text3)">Target &#8369;38</div></div>
-            </div>
-            <div class="rec-reason">Mall traffic is back above pre-pandemic levels. SMPH also has growing residential and office segments. Trading below its historical average P/E. If you add one stock now, this is the most straightforward choice. Adds real estate exposure your portfolio currently lacks.</div>
-            <div class="rec-metrics">
-              <div class="rec-metric"><div class="rec-metric-label">P/E</div><div class="rec-metric-value">22.4x</div></div>
-              <div class="rec-metric"><div class="rec-metric-label">52W High</div><div class="rec-metric-value">&#8369;36.80</div></div>
-              <div class="rec-metric"><div class="rec-metric-label">Upside</div><div class="rec-metric-value" style="color:var(--green)">+13.8%</div></div>
-            </div>
-          </div>
-
-          <!-- #2 MBT -->
-          <div class="rec-card">
-            <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
-              <span style="font-size:11px;font-weight:700;color:var(--blue);background:rgba(10,132,255,0.12);padding:3px 10px;border-radius:20px;">&#35;2 CONSIDER</span>
-              <span style="font-size:11px;color:var(--text3)">Pairs with your BDO</span>
-            </div>
-            <div class="rec-card-top">
-              <div class="rec-card-left">
-                <div class="stock-logo" style="background:linear-gradient(135deg,#ff9f0a,#c35a00);color:#fff;width:40px;height:40px;font-size:12px;">MBT</div>
-                <div><div class="stock-ticker">Metrobank</div><div style="display:flex;gap:6px;margin-top:4px;"><span class="rec-tag buy">BUY</span></div></div>
-              </div>
-              <div class="stock-price-info"><div style="font-size:15px;font-weight:600;">&#8369;78.50</div><div style="font-size:11px;color:var(--text3)">Target &#8369;90</div></div>
-            </div>
-            <div class="rec-reason">Since you already believe in Philippine banks (BDO), MBT gives you diversification within that sector. It is trading below book value at 0.92x, which is historically cheap. You would have two of the country&apos;s biggest banks covered at a discount.</div>
-            <div class="rec-metrics">
-              <div class="rec-metric"><div class="rec-metric-label">P/B</div><div class="rec-metric-value">0.92x</div></div>
-              <div class="rec-metric"><div class="rec-metric-label">Dividend</div><div class="rec-metric-value" style="color:var(--green)">2.8%</div></div>
-              <div class="rec-metric"><div class="rec-metric-label">Upside</div><div class="rec-metric-value" style="color:var(--green)">+14.6%</div></div>
-            </div>
-          </div>
-
-          <!-- #3 URC -->
-          <div class="rec-card">
-            <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
-              <span style="font-size:11px;font-weight:700;color:var(--yellow);background:rgba(255,214,10,0.12);padding:3px 10px;border-radius:20px;">&#35;3 OPTIONAL</span>
-              <span style="font-size:11px;color:var(--text3)">Defensive add</span>
-            </div>
-            <div class="rec-card-top">
-              <div class="rec-card-left">
-                <div class="stock-logo" style="background:linear-gradient(135deg,#ffd60a,#b89200);color:#000;width:40px;height:40px;font-size:12px;">URC</div>
-                <div><div class="stock-ticker">Universal Robina</div><div style="display:flex;gap:6px;margin-top:4px;"><span class="rec-tag buy">BUY</span></div></div>
-              </div>
-              <div class="stock-price-info"><div style="font-size:15px;font-weight:600;">&#8369;112.80</div><div style="font-size:11px;color:var(--text3)">Target &#8369;128</div></div>
-            </div>
-            <div class="rec-reason">People keep buying Chippy and C2 regardless of the economy. URC is a defensive consumer brand that reduces overall portfolio volatility while still offering growth from its ASEAN expansion. Good if you want a calmer stock in the mix.</div>
-            <div class="rec-metrics">
-              <div class="rec-metric"><div class="rec-metric-label">P/E</div><div class="rec-metric-value">18.2x</div></div>
-              <div class="rec-metric"><div class="rec-metric-label">ROE</div><div class="rec-metric-value">11.4%</div></div>
-              <div class="rec-metric"><div class="rec-metric-label">Upside</div><div class="rec-metric-value" style="color:var(--green)">+13.5%</div></div>
-            </div>
-          </div>
-
-          <!-- #4 AC -->
-          <div class="rec-card">
-            <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
-              <span style="font-size:11px;font-weight:700;color:var(--text3);background:var(--bg4);padding:3px 10px;border-radius:20px;">&#35;4 LONG-TERM</span>
-              <span style="font-size:11px;color:var(--text3)">Set and forget</span>
-            </div>
-            <div class="rec-card-top">
-              <div class="rec-card-left">
-                <div class="stock-logo" style="background:linear-gradient(135deg,#5e5ce6,#3634a3);color:#fff;width:40px;height:40px;font-size:12px;">AC</div>
-                <div><div class="stock-ticker">Ayala Corporation</div><div style="display:flex;gap:6px;margin-top:4px;"><span class="rec-tag buy">BUY</span></div></div>
-              </div>
-              <div class="stock-price-info"><div style="font-size:15px;font-weight:600;">&#8369;658.00</div><div style="font-size:11px;color:var(--text3)">Target &#8369;750</div></div>
-            </div>
-            <div class="rec-reason">Ayala exposes you to real estate (ALI), banking (BPI), telecoms (Globe), and infrastructure all in one stock. Slower moving but very stable. Ideal as a long-term hold you barely need to think about. Lower risk than your current two positions.</div>
-            <div class="rec-metrics">
-              <div class="rec-metric"><div class="rec-metric-label">P/E</div><div class="rec-metric-value">14.8x</div></div>
-              <div class="rec-metric"><div class="rec-metric-label">Dividend</div><div class="rec-metric-value" style="color:var(--green)">1.9%</div></div>
-              <div class="rec-metric"><div class="rec-metric-label">Upside</div><div class="rec-metric-value" style="color:var(--green)">+14.0%</div></div>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- DISCLAIMER -->
-        <div style="margin:4px 0 16px;padding:14px 16px;background:var(--bg3);border-radius:12px;border-left:3px solid var(--yellow);">
-          <div style="font-size:11px;font-weight:600;color:var(--yellow);margin-bottom:4px;">DISCLAIMER</div>
-          <div style="font-size:12px;color:var(--text3);line-height:1.6;">This is for informational purposes only and is not financial advice. Always do your own research and consider consulting a licensed financial advisor before investing.</div>
-        </div>
-
+    <div class="screen" id="s-advisor">
+      <div class="hdr"><div class="hdr-title">Advisor</div></div>
+      <div class="adv-area">
+        <div class="sec-title" style="padding-left:0;padding-top:4px;">What to do with your stocks</div>
+        <p class="sec-sub">Advice updates automatically based on live prices.</p>
+        <div class="rcards" id="holdAdvice"></div>
+        <div class="sec-title" style="padding-left:0;">What to buy next</div>
+        <p class="sec-sub">Ranked by live upside. Buy in small tranches, not all at once.</p>
+        <div class="rcards" id="buyAdvice"></div>
+        <div class="disc"><div class="disc-t">DISCLAIMER</div><div class="disc-b">For informational purposes only. Not financial advice. Always do your own research and consult a licensed financial advisor before investing.</div></div>
       </div>
     </div>
 
   </div>
 
   <div class="tab-bar">
-    <div class="tab-item active" id="tab-portfolio" onclick="switchTab('portfolio')"><div class="tab-icon"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zm0 10h8v8h-8v-8zM3 13h8v8H3v-8z"/></svg></div><span class="tab-label">Portfolio</span></div>
-    <div class="tab-item" id="tab-discover" onclick="switchTab('discover')"><div class="tab-icon"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></div><span class="tab-label">Discover</span></div>
-    <div class="tab-item" id="tab-advisor" onclick="switchTab('advisor')"><div class="tab-icon"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg></div><span class="tab-label">Advisor</span></div>
+    <div class="tab active" id="t-portfolio" onclick="goTab('portfolio')">
+      <div class="tab-ic"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zm0 10h8v8h-8v-8zM3 13h8v8H3v-8z"/></svg></div>
+      <span class="tab-lbl">Portfolio</span>
+    </div>
+    <div class="tab" id="t-discover" onclick="goTab('discover')">
+      <div class="tab-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+      <span class="tab-lbl">Discover</span>
+    </div>
+    <div class="tab" id="t-advisor" onclick="goTab('advisor')">
+      <div class="tab-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <span class="tab-lbl">Advisor</span>
+    </div>
   </div>
 </div>
+
 <script>
-function updateClock(){const n=new Date();document.getElementById('clock').textContent=n.getHours()+':'+String(n.getMinutes()).padStart(2,'0');}
-updateClock();setInterval(updateClock,60000);
-function switchTab(tab){['portfolio','discover','advisor'].forEach(t=>{document.getElementById('screen-'+t).classList.remove('active');document.getElementById('tab-'+t).classList.remove('active');});document.getElementById('screen-'+tab).classList.add('active');document.getElementById('tab-'+tab).classList.add('active');document.getElementById('contentArea').scrollTop=0;}
-const chartData={'1D':{line:'M0,45 C40,44 80,48 120,42 C160,36 200,40 240,38 C270,36 295,30 320,24',fill:'M0,45 C40,44 80,48 120,42 C160,36 200,40 240,38 C270,36 295,30 320,24 L320,80 L0,80 Z'},'1W':{line:'M0,65 C30,58 60,52 100,42 C130,35 160,38 190,28 C220,18 260,14 290,8 C305,5 315,3 320,2',fill:'M0,65 C30,58 60,52 100,42 C130,35 160,38 190,28 C220,18 260,14 290,8 C305,5 315,3 320,2 L320,80 L0,80 Z'},'1M':{line:'M0,70 C20,66 35,50 55,58 C75,66 95,45 115,32 C135,20 150,38 170,28 C195,16 230,22 260,14 C285,8 305,10 320,6',fill:'M0,70 C20,66 35,50 55,58 C75,66 95,45 115,32 C135,20 150,38 170,28 C195,16 230,22 260,14 C285,8 305,10 320,6 L320,80 L0,80 Z'},'3M':{line:'M0,72 C25,70 40,72 65,58 C90,44 100,54 125,38 C150,22 165,44 190,30 C215,18 245,12 270,8 C290,5 308,4 320,3',fill:'M0,72 C25,70 40,72 65,58 C90,44 100,54 125,38 C150,22 165,44 190,30 C215,18 245,12 270,8 C290,5 308,4 320,3 L320,80 L0,80 Z'},'1Y':{line:'M0,75 C30,74 50,70 70,72 C95,74 115,60 140,50 C165,40 178,56 200,40 C222,24 248,20 272,12 C292,6 308,4 320,2',fill:'M0,75 C30,74 50,70 70,72 C95,74 115,60 140,50 C165,40 178,56 200,40 C222,24 248,20 272,12 C292,6 308,4 320,2 L320,80 L0,80 Z'}};
-function setChart(e,period){document.querySelectorAll('.period-tab').forEach(t=>t.classList.remove('active'));e.target.classList.add('active');const d=chartData[period];document.getElementById('sparklineLine').setAttribute('d',d.line);document.getElementById('sparklineFill').setAttribute('d',d.fill);}
-(function(){const d=chartData['1W'];document.getElementById('sparklineLine').setAttribute('d',d.line);document.getElementById('sparklineFill').setAttribute('d',d.fill);})();
-function openDetail(ticker){switchTab('advisor');setTimeout(()=>{const el=document.getElementById('detail-'+ticker);if(el){el.scrollIntoView({behavior:'smooth',block:'start'});el.style.outline='2px solid var(--blue)';el.style.borderRadius='16px';setTimeout(()=>{el.style.outline='';el.style.borderRadius='';},1500);}},120);}
-function showUpdateToast(){const t=document.getElementById('updateToast');t.classList.add('visible');setTimeout(()=>t.classList.remove('visible'),2000);}
-if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').then(reg=>{reg.update();navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.type==='SW_UPDATED'){showUpdateToast();setTimeout(()=>window.location.reload(),1200);}});}).catch(err=>console.warn('SW:',err));let refreshing=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!refreshing){refreshing=true;window.location.reload();}});});}
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+const HOLDINGS = [
+  {sym:'JFC.PS', disp:'JFC', name:'Jollibee Foods Corp',  shares:100, avg:218.00, grad:'linear-gradient(135deg,#e63946,#a8201a)', col:'#e63946'},
+  {sym:'BDO.PS', disp:'BDO', name:'BDO Unibank Inc.',      shares:150, avg:144.00, grad:'linear-gradient(135deg,#0a84ff,#0055b3)', col:'#0a84ff'}
+];
+const WATCHLIST = [
+  {sym:'SMPH.PS',disp:'SMPH',name:'SM Prime Holdings',   sector:'Real Estate', target:38,  pe:22.4,pb:2.8, grad:'linear-gradient(135deg,#30d158,#1a7a35)',col:'#30d158'},
+  {sym:'MBT.PS', disp:'MBT', name:'Metrobank',           sector:'Banking',     target:90,  pe:7.8, pb:0.92,grad:'linear-gradient(135deg,#ff9f0a,#c35a00)',col:'#ff9f0a'},
+  {sym:'URC.PS', disp:'URC', name:'Universal Robina',    sector:'Consumer',    target:128, pe:18.2,pb:2.1, grad:'linear-gradient(135deg,#ffd60a,#b89200)',col:'#ffd60a',tc:'#000'},
+  {sym:'AC.PS',  disp:'AC',  name:'Ayala Corporation',   sector:'Conglomerate',target:750, pe:14.8,pb:1.4, grad:'linear-gradient(135deg,#5e5ce6,#3634a3)',col:'#5e5ce6'},
+  {sym:'ALI.PS', disp:'ALI', name:'Ayala Land',          sector:'Real Estate', target:32,  pe:16.5,pb:1.8, grad:'linear-gradient(135deg,#30b0c7,#1a6e80)',col:'#30b0c7'},
+  {sym:'SM.PS',  disp:'SM',  name:'SM Investments',      sector:'Conglomerate',target:1050,pe:19.2,pb:1.9, grad:'linear-gradient(135deg,#5856d6,#3634a3)',col:'#5856d6'},
+];
+const ALL = [...HOLDINGS.map(h=>({sym:h.sym,disp:h.disp,name:h.name,sector:'My Holdings',grad:h.grad,col:h.col})), ...WATCHLIST];
+const FALLBACK = {'JFC.PS':{price:234.50,prev:227.45},'BDO.PS':{price:138.20,prev:140.02},'SMPH.PS':{price:33.40,prev:31.97},'MBT.PS':{price:78.50,prev:76.88},'URC.PS':{price:112.80,prev:108.70},'AC.PS':{price:658.00,prev:639.32},'ALI.PS':{price:26.50,prev:25.80},'SM.PS':{price:952.00,prev:930.00}};
+
+const prices = {};
+let usingFallback = false;
+
+// ─── CLOCK ────────────────────────────────────────────────────────────────────
+function tick(){const n=new Date();document.getElementById('clk').textContent=n.getHours()+':'+String(n.getMinutes()).padStart(2,'0');}
+tick(); setInterval(tick,1000);
+
+// ─── TABS ─────────────────────────────────────────────────────────────────────
+function goTab(t){
+  ['portfolio','discover','advisor'].forEach(x=>{document.getElementById('s-'+x).classList.remove('active');document.getElementById('t-'+x).classList.remove('active');});
+  document.getElementById('s-'+t).classList.add('active');
+  document.getElementById('t-'+t).classList.add('active');
+  document.getElementById('content').scrollTop=0;
+  document.querySelectorAll('.search-drop').forEach(d=>d.style.display='none');
+}
+
+// ─── CHART ────────────────────────────────────────────────────────────────────
+const CD={'1D':{l:'M0,42 C40,41 80,45 120,39 C160,33 200,37 240,35 C270,33 295,27 320,20',f:'M0,42 C40,41 80,45 120,39 C160,33 200,37 240,35 C270,33 295,27 320,20 L320,65 L0,65 Z'},'1W':{l:'M0,58 C30,52 60,48 100,38 C130,30 160,34 190,24 C220,14 260,10 290,5 C305,3 315,2 320,1',f:'M0,58 C30,52 60,48 100,38 C130,30 160,34 190,24 C220,14 260,10 290,5 C305,3 315,2 320,1 L320,65 L0,65 Z'},'1M':{l:'M0,62 C20,59 35,46 55,53 C75,61 95,40 115,28 C135,16 150,34 170,24 C195,12 230,18 260,10 C285,5 305,7 320,4',f:'M0,62 C20,59 35,46 55,53 C75,61 95,40 115,28 C135,16 150,34 170,24 C195,12 230,18 260,10 C285,5 305,7 320,4 L320,65 L0,65 Z'},'3M':{l:'M0,63 C25,61 40,63 65,52 C90,41 100,50 125,35 C150,20 165,40 190,28 C215,16 245,10 270,6 C290,3 308,2 320,1',f:'M0,63 C25,61 40,63 65,52 C90,41 100,50 125,35 C150,20 165,40 190,28 C215,16 245,10 270,6 C290,3 308,2 320,1 L320,65 L0,65 Z'},'1Y':{l:'M0,63 C30,62 50,60 70,62 C95,64 115,52 140,43 C165,34 178,50 200,36 C222,22 248,18 272,10 C292,5 308,3 320,1',f:'M0,63 C30,62 50,60 70,62 C95,64 115,52 140,43 C165,34 178,50 200,36 C222,22 248,18 272,10 C292,5 308,3 320,1 L320,65 L0,65 Z'}};
+function setChart(e,p){document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));e.target.classList.add('active');document.getElementById('spLine').setAttribute('d',CD[p].l);document.getElementById('spFill').setAttribute('d',CD[p].f);}
+(()=>{document.getElementById('spLine').setAttribute('d',CD['1W'].l);document.getElementById('spFill').setAttribute('d',CD['1W'].f);})();
+
+// ─── FORMAT ───────────────────────────────────────────────────────────────────
+const P=n=>'\u20b1'+n.toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2});
+const PCT=n=>(n>=0?'+':'')+n.toFixed(2)+'%';
+const GAIN=n=>(n>=0?'+':'')+'\u20b1'+(n<0?-n:n).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2});
+const CC=n=>n>0?'up':n<0?'down':'flat';
+function spark(chg,col){
+  const pts=chg>1?'0,28 10,24 20,22 30,16 40,12 50,10 60,7':chg>0?'0,26 10,23 20,22 30,19 40,17 50,15 60,13':chg<-1?'0,8 10,12 20,15 30,19 40,22 50,25 60,29':'0,15 10,17 20,14 30,18 40,16 50,18 60,20';
+  return `<svg class="schartw" viewBox="0 0 60 36" preserveAspectRatio="none"><polyline points="${pts}" stroke="${col}" stroke-width="1.5" fill="none"/></svg>`;
+}
+
+// ─── PRICE FETCH ─────────────────────────────────────────────────────────────
+// Try multiple Yahoo Finance endpoints — works from real browsers with user cookies
+const YF_ENDPOINTS = [
+  sym => `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`,
+  sym => `https://query2.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`,
+  sym => `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${sym}`,
+];
+
+async function fetchOne(sym) {
+  for (const ep of YF_ENDPOINTS) {
+    try {
+      const r = await fetch(ep(sym), {
+        headers: {'Accept':'application/json','User-Agent':'Mozilla/5.0'},
+        signal: AbortSignal.timeout(6000)
+      });
+      if (!r.ok) continue;
+      const d = await r.json();
+      // v8 chart format
+      if (d.chart && d.chart.result && d.chart.result[0]) {
+        const m = d.chart.result[0].meta;
+        const price = m.regularMarketPrice;
+        const prev  = m.chartPreviousClose || m.previousClose || price;
+        return { price, prev, chg: price-prev, pct: ((price-prev)/prev)*100 };
+      }
+      // v7 quote format
+      if (d.quoteResponse && d.quoteResponse.result && d.quoteResponse.result[0]) {
+        const q = d.quoteResponse.result[0];
+        const price = q.regularMarketPrice;
+        const prev  = q.regularMarketPreviousClose || price;
+        return { price, prev, chg: price-prev, pct: ((price-prev)/prev)*100 };
+      }
+    } catch(e) { /* try next endpoint */ }
+  }
+  return null;
+}
+
+async function loadPrices(manual=false) {
+  if (manual) toast('Refreshing prices...');
+  setStatus('loading', 'Fetching live prices...');
+  const syms = [...new Set([...HOLDINGS.map(h=>h.sym), ...WATCHLIST.map(w=>w.sym)])];
+  let ok = 0;
+  await Promise.all(syms.map(async sym => {
+    const r = await fetchOne(sym);
+    if (r) { prices[sym] = r; ok++; }
+  }));
+
+  if (ok === 0) {
+    // All failed — load fallback data
+    usingFallback = true;
+    for (const [sym, fb] of Object.entries(FALLBACK)) {
+      prices[sym] = { price: fb.price, prev: fb.prev, chg: fb.price-fb.prev, pct: ((fb.price-fb.prev)/fb.prev)*100 };
+    }
+    setStatus('error', 'Using last known prices (live fetch failed)');
+    document.getElementById('errBanner').classList.add('show');
+  } else {
+    usingFallback = false;
+    document.getElementById('errBanner').classList.remove('show');
+    const t = new Date();
+    const ts = t.getHours()+':'+String(t.getMinutes()).padStart(2,'0')+':'+String(t.getSeconds()).padStart(2,'0');
+    setStatus('live', (ok<syms.length?`${ok}/${syms.length} stocks updated `:`All prices updated `)+ts);
+    if (manual) toast(`Prices updated \u2713`);
+  }
+  renderAll();
+}
+
+function setStatus(state, msg) {
+  const dot = document.getElementById('dot');
+  dot.className = 'live-dot' + (state==='error'?' error':state==='loading'?' loading':'');
+  document.getElementById('lastUpd').textContent = msg;
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function renderAll() { renderPortfolio(); renderDiscover(); renderAdvisor(); }
+
+function renderPortfolio() {
+  let totVal=0, totCost=0, dayPL=0;
+  const circ = 2*Math.PI*32;
+
+  const html = HOLDINGS.map(h=>{
+    const p = prices[h.sym];
+    if (!p) return holdSkeleton(h);
+    const val = p.price*h.shares, gain=(p.price-h.avg)*h.shares, day=p.chg*h.shares;
+    totVal+=val; totCost+=h.avg*h.shares; dayPL+=day;
+    const cc=CC(gain);
+    return `<div class="scard ${cc}" onclick="goDetail('${h.disp}')">
+      <div class="slogo" style="background:${h.grad};color:#fff;">${h.disp}</div>
+      <div class="sinfo"><div class="sticker">${h.disp}</div><div class="sname">${h.name}</div><div class="ssub">${h.shares} shares · Avg ${P(h.avg)}</div></div>
+      ${spark(p.pct,gain>=0?'#30d158':'#ff453a')}
+      <div class="spinfo">
+        <div class="sprice">${P(p.price)}</div>
+        <div class="sbadge ${CC(p.pct)}">${PCT(p.pct)}</div>
+        <div style="font-size:10px;color:${gain>=0?'var(--green)':'var(--red)'};margin-top:2px;">${GAIN(gain)}</div>
+      </div></div>`;
+  }).join('');
+
+  document.getElementById('holdList').innerHTML = html;
+
+  if (totVal > 0) {
+    const gain=totVal-totCost, ret=(gain/totCost)*100;
+    const cc=CC(gain);
+    document.getElementById('totVal').textContent = P(totVal);
+    document.getElementById('totChg').textContent = `${gain>=0?'\u25b2':'\u25bc'} ${GAIN(gain)}  ${PCT(ret)} total return`;
+    document.getElementById('totChg').className = 'sum-chg '+cc;
+    document.getElementById('pg').innerHTML=`<span style="color:${gain>=0?'var(--green)':'var(--red)'}">${GAIN(gain)}</span>`;
+    document.getElementById('pr').innerHTML=`<span style="color:${ret>=0?'var(--green)':'var(--red)'}">${PCT(ret)}</span>`;
+    document.getElementById('pd').innerHTML=`<span style="color:${dayPL>=0?'var(--green)':'var(--red)'}">${GAIN(dayPL)}</span>`;
+    // Donut
+    const jVal=(prices['JFC.PS']?.price||218)*100, bVal=(prices['BDO.PS']?.price||144)*150, tot=jVal+bVal;
+    const jArc=(jVal/tot)*circ, bArc=(bVal/tot)*circ;
+    document.getElementById('dJFC').setAttribute('stroke-dasharray',`${jArc} ${circ-jArc}`);
+    document.getElementById('dBDO').setAttribute('stroke-dasharray',`${bArc} ${circ-bArc}`);
+    document.getElementById('dBDO').setAttribute('stroke-dashoffset',`-${jArc}`);
+    document.getElementById('aJFC').textContent=((jVal/tot)*100).toFixed(1)+'%';
+    document.getElementById('aBDO').textContent=((bVal/tot)*100).toFixed(1)+'%';
+  }
+}
+
+function holdSkeleton(h){
+  return `<div class="scard loading">
+    <div class="slogo" style="background:${h.grad};color:#fff;">${h.disp}</div>
+    <div class="sinfo"><div class="sticker">${h.disp}</div><div class="sname">${h.name}</div><div class="ssub">${h.shares} shares</div></div>
+    <div style="flex:1"></div>
+    <div class="spinfo"><div class="skel" style="width:60px;height:16px;margin-bottom:6px;"></div><div class="skel" style="width:44px;height:14px;"></div></div>
+  </div>`;
+}
+
+function renderDiscover() {
+  const withPx = [...HOLDINGS.map(h=>({...h,sector:'Holdings',...(prices[h.sym]||{})})), ...WATCHLIST.map(w=>({...w,...(prices[w.sym]||{})}))].filter(s=>s.price);
+  const sorted = [...withPx].sort((a,b)=>(b.pct||0)-(a.pct||0));
+  document.getElementById('topList').innerHTML = sorted.slice(0,5).map(s=>{
+    const cc=CC(s.pct||0);
+    return `<div class="scard ${cc}">
+      <div class="slogo" style="background:${s.grad};color:${s.tc||'#fff'};font-size:12px;">${s.disp}</div>
+      <div class="sinfo"><div class="sticker">${s.disp}</div><div class="sname">${s.name}</div><div class="ssub">${s.sector}</div></div>
+      ${spark(s.pct||0,s.pct>=0?'#30d158':'#ff453a')}
+      <div class="spinfo"><div class="sprice">${P(s.price)}</div><div class="sbadge ${cc}">${PCT(s.pct||0)}</div></div>
+    </div>`;
+  }).join('')||'<div style="padding:20px;text-align:center;color:var(--text3)">Loading market data...</div>';
+
+  const wl = WATCHLIST.filter(s=>prices[s.sym]).map(s=>({...s,p:prices[s.sym],upside:((s.target-prices[s.sym].price)/prices[s.sym].price)*100})).sort((a,b)=>b.upside-a.upside);
+  document.getElementById('watchCards').innerHTML = wl.map(s=>{
+    const uc=s.upside>0?'var(--green)':'var(--red)';
+    return `<div class="rcard">
+      <div class="rtop">
+        <div class="rtop-left">
+          <div class="slogo" style="background:${s.grad};color:${s.tc||'#fff'};width:40px;height:40px;font-size:12px;">${s.disp}</div>
+          <div><div class="sticker">${s.name}</div><div style="display:flex;gap:6px;margin-top:4px;"><span class="rtag ${s.upside>5?'buy':'watch'}">${s.upside>5?'BUY':'WATCH'}</span><span style="font-size:11px;color:var(--text3)">${s.sector}</span></div></div>
+        </div>
+        <div class="spinfo"><div class="sprice">${P(s.p.price)}</div><div class="sbadge ${CC(s.p.pct)}" style="margin-top:3px;">${PCT(s.p.pct)}</div></div>
+      </div>
+      <div class="rmetrics"><div class="rmet"><div class="rmet-lbl">Target</div><div class="rmet-val">${P(s.target)}</div></div><div class="rmet"><div class="rmet-lbl">Upside</div><div class="rmet-val" style="color:${uc}">${s.upside>=0?'+':''}${s.upside.toFixed(1)}%</div></div><div class="rmet"><div class="rmet-lbl">P/E</div><div class="rmet-val">${s.pe}x</div></div></div>
+    </div>`;
+  }).join('')||'<div style="padding:20px;text-align:center;color:var(--text3)">Loading...</div>';
+}
+
+const BUY_WHY = {
+  'SMPH':'Mall traffic above pre-pandemic levels. Q1 earnings beat by 12%. Adds real estate exposure your portfolio lacks.',
+  'MBT': 'Trading below book value. Since you hold BDO, MBT diversifies your bank exposure at a discount.',
+  'URC': 'Defensive consumer brand. People buy Chippy and C2 regardless of the economy. ASEAN expansion adds growth.',
+  'AC':  'One stock that covers real estate (ALI), banking (BPI), and telecoms (Globe). Stable long-term compounder.',
+  'ALI': 'Pure-play real estate with strong residential pipeline and Ayala Malls recurring income.',
+  'SM':  'Controls SM Malls, BDO Bank, and SM Supermarkets. Diversified and highly liquid.',
+};
+const PRIO = [
+  {lbl:'#1 PRIORITY',col:'var(--green)',bg:'rgba(48,209,88,0.12)',note:'Best upside right now'},
+  {lbl:'#2 CONSIDER',col:'var(--blue)',bg:'rgba(10,132,255,0.12)',note:'Strong value'},
+  {lbl:'#3 OPTIONAL',col:'var(--yellow)',bg:'rgba(255,214,10,0.12)',note:'Defensive add'},
+  {lbl:'#4 LONG-TERM',col:'var(--text3)',bg:'var(--bg4)',note:'Set & forget'},
+];
+
+function renderAdvisor() {
+  // Holdings advice - fully dynamic
+  document.getElementById('holdAdvice').innerHTML = HOLDINGS.map(h=>{
+    const p = prices[h.sym];
+    const stock = WATCHLIST.find(s=>s.disp===h.disp)||{target:h.disp==='JFC'?250:155};
+    if (!p) return `<div class="rcard" id="det-${h.disp}"><div class="slogo" style="background:${h.grad};color:#fff;width:40px;height:40px;font-size:12px;margin-bottom:10px;">${h.disp}</div><div class="sec-sub">Loading live price...</div></div>`;
+    const gain=(p.price-h.avg)*h.shares, pct=((p.price-h.avg)/h.avg)*100, upside=((stock.target-p.price)/p.price)*100;
+    let action, lbl, reason;
+    if (pct >= 20) {
+      action='sell'; lbl='TAKE PROFITS';
+      reason = `You are up ${pct.toFixed(1)}% — an excellent return. ${h.disp} is near or above target. Consider selling 50% to lock in gains while keeping the rest for further upside.`;
+    } else if (pct >= 8 && upside > 5) {
+      action='hold'; lbl='HOLD';
+      reason = `Up ${pct.toFixed(1)}% with ${upside.toFixed(1)}% more potential upside to analyst target of ${P(stock.target)}. Solid gain — let it run. No reason to sell yet.`;
+    } else if (pct >= 0) {
+      action='hold'; lbl='HOLD';
+      reason = `Up ${pct.toFixed(1)}%. ${upside.toFixed(1)}% upside remaining to target ${P(stock.target)}. Continue holding. The position is working.`;
+    } else if (pct >= -8) {
+      action='hold'; lbl='HOLD — Don\'t Panic';
+      reason = `Down only ${Math.abs(pct).toFixed(1)}% — a normal market fluctuation. Not a reason to sell. Target is ${P(stock.target)}, giving ${upside.toFixed(1)}% upside from here. Hold.`;
+    } else if (pct >= -20) {
+      action='hold'; lbl='HOLD / AVG DOWN?';
+      reason = `Down ${Math.abs(pct).toFixed(1)}%. If you believe in ${h.disp} long-term, buying more now lowers your average cost. If not, hold — avoid panic selling at a loss.`;
+    } else {
+      action='sell'; lbl='REVIEW POSITION';
+      reason = `Down ${Math.abs(pct).toFixed(1)}%. Review whether your original thesis still holds. If fundamentals changed, cutting the loss and redeploying into higher-upside names may be wiser.`;
+    }
+    const gc=gain>=0?'var(--green)':'var(--red)';
+    return `<div class="rcard" id="det-${h.disp}">
+      <div class="rtop">
+        <div class="rtop-left">
+          <div class="slogo" style="background:${h.grad};color:#fff;width:40px;height:40px;font-size:12px;">${h.disp}</div>
+          <div><div class="sticker">${h.disp} · ${h.name}</div><div style="margin-top:4px;"><span class="rtag ${action}">${lbl}</span></div></div>
+        </div>
+        <div class="spinfo"><div style="font-size:15px;font-weight:600;color:${gc}">${GAIN(gain)}</div><div style="font-size:11px;color:var(--text3)">unrealized</div></div>
+      </div>
+      <div class="insight">Today: ${PCT(p.pct)} &nbsp;·&nbsp; ${GAIN(p.chg*h.shares)} on your ${h.shares} shares &nbsp;·&nbsp; ${usingFallback?'last known price':'live'}</div>
+      <div class="rreason">${reason}</div>
+      <div class="rmetrics">
+        <div class="rmet"><div class="rmet-lbl">Your Avg</div><div class="rmet-val">${P(h.avg)}</div></div>
+        <div class="rmet"><div class="rmet-lbl">Live Price</div><div class="rmet-val" style="color:${gc}">${P(p.price)}</div></div>
+        <div class="rmet"><div class="rmet-lbl">Target</div><div class="rmet-val">${P(stock.target)}</div></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Buy advice - ranked by live upside
+  const buys = WATCHLIST.filter(s=>prices[s.sym]).map(s=>({...s,p:prices[s.sym],upside:((s.target-prices[s.sym].price)/prices[s.sym].price)*100})).sort((a,b)=>b.upside-a.upside);
+  document.getElementById('buyAdvice').innerHTML = buys.slice(0,4).map((s,i)=>{
+    const pl=PRIO[i]||PRIO[3], uc=s.upside>0?'var(--green)':'var(--red)';
+    return `<div class="rcard ${i===0?'prio':''}">
+      <div style="margin-bottom:10px;"><span class="pbadge" style="color:${pl.col};background:${pl.bg}">${pl.lbl}</span><span style="font-size:11px;color:var(--text3);margin-left:6px;">${pl.note}</span></div>
+      <div class="rtop">
+        <div class="rtop-left">
+          <div class="slogo" style="background:${s.grad};color:${s.tc||'#fff'};width:40px;height:40px;font-size:12px;">${s.disp}</div>
+          <div><div class="sticker">${s.name}</div><div style="margin-top:4px;"><span class="rtag buy">BUY</span><span style="font-size:11px;color:var(--text3);margin-left:6px;">${s.sector}</span></div></div>
+        </div>
+        <div class="spinfo"><div class="sprice">${P(s.p.price)}</div><div class="sbadge ${CC(s.p.pct)}" style="margin-top:3px;">${PCT(s.p.pct)}</div></div>
+      </div>
+      <div class="insight">Live upside to target: ${s.upside>=0?'+':''}${s.upside.toFixed(1)}% &nbsp;·&nbsp; Target ${P(s.target)}</div>
+      <div class="rreason">${BUY_WHY[s.disp]||'Strong fundamentals with solid upside potential.'}</div>
+      <div class="rmetrics"><div class="rmet"><div class="rmet-lbl">Live Price</div><div class="rmet-val">${P(s.p.price)}</div></div><div class="rmet"><div class="rmet-lbl">Upside</div><div class="rmet-val" style="color:${uc}">${s.upside>=0?'+':''}${s.upside.toFixed(1)}%</div></div><div class="rmet"><div class="rmet-lbl">P/E</div><div class="rmet-val">${s.pe}x</div></div></div>
+    </div>`;
+  }).join('')||'<div style="padding:20px;text-align:center;color:var(--text3)">Loading live data to rank recommendations...</div>';
+}
+
+// ─── SEARCH ───────────────────────────────────────────────────────────────────
+function doSearch(q,did){
+  const qid=did==='d1'?'q1':'q2', xid=did==='d1'?'x1':'x2';
+  document.getElementById(xid).style.display=q?'flex':'none';
+  const drop=document.getElementById(did);
+  if(!q){drop.style.display='none';return;}
+  const ql=q.toLowerCase();
+  const hits=ALL.filter(s=>s.disp.toLowerCase().includes(ql)||s.name.toLowerCase().includes(ql)||(s.sector||'').toLowerCase().includes(ql));
+  if(!hits.length){drop.style.display='block';drop.innerHTML='<div style="padding:16px;text-align:center;color:var(--text3);font-size:14px;">No results found</div>';return;}
+  drop.style.display='block';
+  drop.innerHTML=hits.map(s=>{
+    const p=prices[s.sym];
+    return `<div class="s-item" onclick="pickSearch('${s.sym}','${s.disp}','${did}')">
+      <div class="slogo" style="background:${s.grad};color:${s.tc||'#fff'};width:38px;height:38px;font-size:11px;border-radius:9px;">${s.disp}</div>
+      <div style="flex:1"><div style="font-size:14px;font-weight:600">${s.disp}</div><div style="font-size:12px;color:var(--text3)">${s.name}</div></div>
+      <div style="text-align:right">${p?`<div style="font-size:14px;font-weight:600">${P(p.price)}</div><div class="sbadge ${CC(p.pct)}" style="font-size:10px">${PCT(p.pct)}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function pickSearch(sym,disp,did){
+  clrSearch(did==='d1'?'q1':'q2',did);
+  const isHolding=HOLDINGS.find(h=>h.sym===sym);
+  if(isHolding){goTab('advisor');setTimeout(()=>{const el=document.getElementById('det-'+disp);if(el){el.scrollIntoView({behavior:'smooth',block:'start'});el.style.outline='2px solid var(--blue)';el.style.borderRadius='16px';setTimeout(()=>{el.style.outline='';el.style.borderRadius='';},1600);}},150);}
+  else{goTab('discover');}
+}
+
+function clrSearch(qid,did){document.getElementById(qid).value='';document.getElementById(did).style.display='none';document.getElementById(qid==='q1'?'x1':'x2').style.display='none';}
+
+// Tap holding → advisor
+function goDetail(d){goTab('advisor');setTimeout(()=>{const el=document.getElementById('det-'+d);if(el){el.scrollIntoView({behavior:'smooth',block:'start'});el.style.outline='2px solid var(--blue)';el.style.borderRadius='16px';setTimeout(()=>{el.style.outline='';el.style.borderRadius='';},1500);}},130);}
+
+// ─── TOAST ────────────────────────────────────────────────────────────────────
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);}
+
+// ─── SW ───────────────────────────────────────────────────────────────────────
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').then(r=>{r.update();navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.type==='SW_UPDATED'){toast('App updated');setTimeout(()=>window.location.reload(),1200);}});}).catch(()=>{});let ref=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!ref){ref=true;window.location.reload();}});});}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+loadPrices();
+setInterval(loadPrices, 120000); // auto-refresh every 2 mins
 </script>
 </body>
 </html>
