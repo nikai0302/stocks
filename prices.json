@@ -1,15 +1,15 @@
 {
-  "prices": {
-    "JFC":  { "price": 234.50, "prev": 227.45, "chg":  7.05, "pct":  3.10 },
-    "BDO":  { "price": 138.20, "prev": 140.02, "chg": -1.82, "pct": -1.30 },
-    "SMPH": { "price":  33.40, "prev":  31.97, "chg":  1.43, "pct":  4.47 },
-    "MBT":  { "price":  78.50, "prev":  76.88, "chg":  1.62, "pct":  2.11 },
-    "URC":  { "price": 112.80, "prev": 108.70, "chg":  4.10, "pct":  3.77 },
-    "AC":   { "price": 658.00, "prev": 639.32, "chg": 18.68, "pct":  2.92 },
-    "ALI":  { "price":  26.50, "prev":  25.80, "chg":  0.70, "pct":  2.71 },
-    "SM":   { "price": 952.00, "prev": 930.00, "chg": 22.00, "pct":  2.37 }
-  },
-  "updated": "2026-01-01T00:00:00Z",
-  "errors": [],
-  "count": 8
+  "prices": {},
+  "updated": "2026-05-03T12:45:45Z",
+  "errors": [
+    "JFC: 'PriceHistory' object has no attribute '_dividends'",
+    "BDO: 'PriceHistory' object has no attribute '_dividends'",
+    "SMPH: 'PriceHistory' object has no attribute '_dividends'",
+    "MBT: 'PriceHistory' object has no attribute '_dividends'",
+    "URC: 'PriceHistory' object has no attribute '_dividends'",
+    "AC: 'PriceHistory' object has no attribute '_dividends'",
+    "ALI: 'PriceHistory' object has no attribute '_dividends'",
+    "SM: 'PriceHistory' object has no attribute '_dividends'"
+  ],
+  "count": 0
 }
