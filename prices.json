@@ -1,6 +1,6 @@
 {
   "prices": {},
-  "updated": "2026-05-22T20:28:01Z",
+  "updated": "2026-05-22T21:58:08Z",
   "errors": [
     "JFC: 'PriceHistory' object has no attribute '_dividends'",
     "BDO: 'PriceHistory' object has no attribute '_dividends'",
