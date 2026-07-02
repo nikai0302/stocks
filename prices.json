@@ -1,6 +1,6 @@
 {
   "prices": {},
-  "updated": "2026-07-01T23:02:10Z",
+  "updated": "2026-07-02T02:12:45Z",
   "errors": [
     "JFC: float() argument must be a string or a real number, not 'NoneType'",
     "BDO: float() argument must be a string or a real number, not 'NoneType'",
