@@ -1,8 +1,8 @@
 {
   "prices": {},
-  "updated": "2026-08-26T14:34:16Z",
+  "updated": "2026-08-26T16:09:30Z",
   "errors": [
-    "JFC: Too Many Requests. Rate limited. Try after a while.",
+    "JFC: float() argument must be a string or a real number, not 'NoneType'",
     "BDO: float() argument must be a string or a real number, not 'NoneType'",
     "SMPH: float() argument must be a string or a real number, not 'NoneType'",
     "MBT: float() argument must be a string or a real number, not 'NoneType'",
