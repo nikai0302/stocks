@@ -1,12 +1,12 @@
 {
   "prices": {},
-  "updated": "2026-09-19T05:16:45Z",
+  "updated": "2026-09-19T09:56:10Z",
   "errors": [
-    "JFC: float() argument must be a string or a real number, not 'NoneType'",
-    "BDO: float() argument must be a string or a real number, not 'NoneType'",
-    "SMPH: float() argument must be a string or a real number, not 'NoneType'",
-    "MBT: float() argument must be a string or a real number, not 'NoneType'",
-    "URC: float() argument must be a string or a real number, not 'NoneType'",
+    "JFC: 'currentTradingPeriod'",
+    "BDO: 'currentTradingPeriod'",
+    "SMPH: 'currentTradingPeriod'",
+    "MBT: 'currentTradingPeriod'",
+    "URC: 'currentTradingPeriod'",
     "AC: 'currentTradingPeriod'",
     "ALI: 'currentTradingPeriod'",
     "SM: 'currentTradingPeriod'"
